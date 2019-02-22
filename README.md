@@ -29,9 +29,23 @@ pep2peaks:基于seq2seq的内部离子的强度预测模型
 	AELFLR	2	ELF	NULL	390.2018,0.0	y5b4+,y5a4+	0.0128269495163,0.0	1816.5,0.0	
 	AELFLR	2	LFL	NULL	0.0,0.0	y4b5+,y4a5+	0.0,0.0	0.0,0.0	
 	AELFLR	2	ELFL	NULL	0.0,0.0	y5b5+,y5a5+	0.0,0.0	0.0,0.0
+	
+	
+	在该项目中
 3,使用pep2peaks
 	本实验中已经训练好的模型存放于models/目录下面。
-	对于单条肽序列的预测，本实验提供了示例接口位于example.py。对于多条肽的预测，需要将肽序列写入文件中，文件内容格式如上所示，预测脚本位于model/pep2peaks.py，并将参数is_train设置为2，表示仅测试。如果需要重新训练，则将该参数设置为1。另外，对于不同的离子类型，需要设置不同的参数，如下图所示：
+	对于单条肽序列的预测，本实验提供了示例接口位于example.py。对于多条肽的预测，需要将肽序列写入文件中，文件内容格式如上所示，预测脚本位于model/pep2peaks.py，并将参数is_train设置为2，表示仅测试，同时需要设置参数model，表示已经训练好的模型的位置。如果需要重新训练，则将参数is_train设置为1。
+	另外，无论是训练还是预测，对于不同的离子类型，需要设置不同的参数。对于常规离子的训练或预测，需要设置：
+		ion_type=regular
+		input_dim=188
+		output_dim=4
+	而对于内部离子的预测，需要设置		
+		ion_type=internal
+		input_dim=217
+		output_dim=2
+		min_internal_ion_len=？
+		max_internal_ion_len=？
+	其中ion_type代表离子类型，input_dim和output_dim分别代表数据的输入维度和输出维度，在本项目中，常规离子的输入维度为188，内部离子的输入维度为217，详情请参考文件tools/get_data.py。常规离子的输出维度为4，分别代表b+/b++/y+/y++，内部离子的输出维度为2，分别代表by+/ay+。min_internal_ion_len和max_internal_ion_len代表内部离子的训练或预测实验中需要训练或预测的内部离子的最小碎片长度和最大碎片长度（两侧临界值均为闭区间）。
 	
 	
 	
