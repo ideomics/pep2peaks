@@ -2,9 +2,9 @@
 
 ## pep2peaks:Intensity prediction model of internal ions based on seq2seq
 
-###1, Environmental requirements: python 3.5.2, tendorflow GPU 1.8.0
+#### 1, Environmental requirements<br/>python 3.5.2, tendorflow GPU 1.8.0
 
-###2,Data.<br/>
+#### 2,Data.<br/>
    The experimental data is a text document in .txt format. The content format is: 
    peptide(tab)charge[tab]ion[tab]modification[tab]ion-mass[tab]ion-type[tab]ion-relative-intensity[tab]ion-absolute-intensity 
 	
@@ -31,7 +31,7 @@
 	AELFLR	2	LFL	NULL	0.0,0.0	y4b5+,y4a5+	0.0,0.0	0.0,0.0	
 	AELFLR	2	ELFL	NULL	0.0,0.0	y5b5+,y5a5+	0.0,0.0	0.0,0.0
 	
-###3,use pep2peaks.<br/>
+#### 3,use pep2peaks.<br/>
     The models that have been trained in this project are stored in the models/.<br/>
     For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.<br/>
 	
@@ -50,6 +50,6 @@
 	max_internal_ion_len=？<br/>
    Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 188, and the input dimension of the internal ion is 217. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
 	
-###contact:<br/>
+#### contact:<br/>
    hpwang@sdut.edu.cn<br/>
    xzachariah0604@gmail.com<br/>
