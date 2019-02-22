@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{c628413d-217f-4a03-934b-9ecee4d12268}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>example.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <InterpreterVersion />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="data_preprocessing\merge_ion.py" />
+    <Compile Include="data_preprocessing\mm_data.py" />
+    <Compile Include="data_preprocessing\proteometools_data.py" />
+    <Compile Include="data_preprocessing\tools.py" />
+    <Compile Include="example.py" />
+    <Compile Include="model\model.py" />
+    <Compile Include="model\pep2peaks.py" />
+    <Compile Include="tools\get_data.py" />
+    <Compile Include="tools\pearson.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
+    <Folder Include="data\data_mm\" />
+    <Folder Include="data\data_proteometools\" />
+    <Folder Include="data_preprocessing" />
+    <Folder Include="model" />
+    <Folder Include="models\" />
+    <Folder Include="models\internal_mm_all\" />
+    <Folder Include="models\internal_proteometools_NCE25_all\" />
+    <Folder Include="models\internal_proteometools_NCE30_all\" />
+    <Folder Include="models\internal_proteometools_NCE35_all\" />
+    <Folder Include="models\regular_mm_all\" />
+    <Folder Include="models\regular_proteometools_NCE25_all\" />
+    <Folder Include="models\regular_proteometools_NCE30_all\" />
+    <Folder Include="models\regular_proteometools_NCE35_all\" />
+    <Folder Include="model\logs\" />
+    <Folder Include="tools" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\data_mm\ay_by_test.txt" />
+    <Content Include="data\data_mm\ay_by_train.txt" />
+    <Content Include="data\data_mm\b_y_test.txt" />
+    <Content Include="data\data_mm\b_y_train.txt" />
+    <Content Include="data\data_proteometools\NCE25_ay_by_test.txt" />
+    <Content Include="data\data_proteometools\NCE25_ay_by_train.txt" />
+    <Content Include="data\data_proteometools\NCE25_b_y_test.txt" />
+    <Content Include="data\data_proteometools\NCE25_b_y_train.txt" />
+    <Content Include="data\data_proteometools\NCE30_ay_by_test.txt" />
+    <Content Include="data\data_proteometools\NCE30_ay_by_train.txt" />
+    <Content Include="data\data_proteometools\NCE30_b_y_test.txt" />
+    <Content Include="data\data_proteometools\NCE30_b_y_train.txt" />
+    <Content Include="data\data_proteometools\NCE35_ay_by_test.txt" />
+    <Content Include="data\data_proteometools\NCE35_ay_by_train.txt" />
+    <Content Include="data\data_proteometools\NCE35_b_y_test.txt" />
+    <Content Include="data\data_proteometools\NCE35_b_y_train.txt" />
+    <Content Include="data\internal_pred.csv" />
+    <Content Include="data\regular_pred.csv" />
+    <Content Include="models\checkpoint" />
+    <Content Include="models\internal_mm_all\checkpoint" />
+    <Content Include="models\internal_mm_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\internal_mm_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\internal_mm_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\internal_proteometools_NCE25_all\checkpoint" />
+    <Content Include="models\internal_proteometools_NCE25_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\internal_proteometools_NCE25_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\internal_proteometools_NCE25_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\internal_proteometools_NCE30_all\checkpoint" />
+    <Content Include="models\internal_proteometools_NCE30_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\internal_proteometools_NCE30_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\internal_proteometools_NCE30_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\internal_proteometools_NCE35_all\checkpoint" />
+    <Content Include="models\internal_proteometools_NCE35_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\internal_proteometools_NCE35_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\internal_proteometools_NCE35_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\model.ckpt.data-00000-of-00001" />
+    <Content Include="models\model.ckpt.data-00000-of-00001.tempstate15375239888136102503" />
+    <Content Include="models\model.ckpt.index" />
+    <Content Include="models\model.ckpt.meta" />
+    <Content Include="models\regular_mm_all\checkpoint" />
+    <Content Include="models\regular_mm_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\regular_mm_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\regular_mm_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\regular_proteometools_NCE25_all\checkpoint" />
+    <Content Include="models\regular_proteometools_NCE25_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\regular_proteometools_NCE25_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\regular_proteometools_NCE25_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\regular_proteometools_NCE30_all\checkpoint" />
+    <Content Include="models\regular_proteometools_NCE30_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\regular_proteometools_NCE30_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\regular_proteometools_NCE30_all\seq2seq-model.ckpt.meta" />
+    <Content Include="models\regular_proteometools_NCE35_all\checkpoint" />
+    <Content Include="models\regular_proteometools_NCE35_all\seq2seq-model.ckpt.data-00000-of-00001" />
+    <Content Include="models\regular_proteometools_NCE35_all\seq2seq-model.ckpt.index" />
+    <Content Include="models\regular_proteometools_NCE35_all\seq2seq-model.ckpt.meta" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>

@@ -7,15 +7,16 @@ from tools.get_data import *
 from tools.pearson import *
 import tensorflow as tf
 from data_preprocessing.tools import *
+from model.model import *
 class example(object):
     def __init__(self):
-        self.regular_model='seq2seq-WGAN/model/regular_proteometools_NCE35_all/'
-        self.internal_model='seq2seq-WGAN/model/internal_proteometools_NCE35_all/'
-        self.modi=''
-        self.charge=3
+        self.regular_model='models/regular_mm_all/'
+        self.internal_model='models/internal_mm_all/'
+        self.modi='6,Oxidation[M],15,Oxidation[M]'
+        self.charge=2
         self.internal_ion_min_length=1
         self.internal_ion_max_length=2
-        self.peptide='RAEYWENYPPAH'
+        self.peptide='VLDDTmAVADILTSmVVDVSDLLDQAR'
         self.datam=GetData('example')
 
         self.PROTON= 1.007276466583
@@ -102,11 +103,12 @@ class example(object):
         for i in range(ions_number):
             line=self.peptide+'\t'+str(self.charge)+'\t'+bs[i]+','+ys[i]+'\t'+self.modi+'\t\t'+b_name[i]+'+,'+b_name[i]+'++,'+y_name[i]+'+,'+y_name[i]+'++'+'\t0,0,0,0'
             _,vector,_,_=self.datam.ion_b_y_featurize_4label(line)
+            print(vector)
             encoder_inputs.append(vector)
         regular_pred=[]
         with tf.Session() as session:
             model.saver.restore(session, tf.train.get_checkpoint_state(self.regular_model).model_checkpoint_path)
-            pred=model.predict(session,ions_number,self.datam.vertor_normalize(np.array(encoder_inputs))[np.newaxis,:,:],[ions_number])
+            pred=model.predict(session,ions_number,np.array(encoder_inputs)[np.newaxis,:,:],[ions_number])
             pred[pred<0]=0
             pred[pred>1]=1
             for k in range(4):
@@ -135,10 +137,15 @@ class example(object):
             pred[pred>1]=1
             for k in range(2):
                 internal_pred.extend(np.array(pred)[:,k].tolist())
-        print(regular_ion_type)
-        print(regular_pred)
-        print(internal_ion_type)
-        print(internal_pred)
+
+        ##################
+        print('regular ions:')
+        for i in range(len(regular_ion_type)):
+            print(regular_ion_type[i]+":"+str(regular_pred[i]))
+        print('\ninternal ions:')
+        for i in range(len(internal_ion_type)):
+            print(internal_ion_type[i]+":"+str(internal_pred[i])) 
+        
         self.plot(regular_ion_type,regular_mzs,regular_pred,internal_ion_type,internal_mzs,internal_pred)
 if __name__=='__main__':
     example()

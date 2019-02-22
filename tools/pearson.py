@@ -155,7 +155,7 @@ class CalcPerson(object):
             print('all: '+str(np.mean(_list)))
     def get_len_regular_pearson(self,merge_list,test_idx,peptide,pred,test_y):
         person_list_dic=defaultdict(list)
-        pccs=[]
+        pccs=[];peplens=[]
     
         pep_len_list=[5,10,15,20,25,3000]
         print('calculate person coefficient..')
@@ -163,32 +163,28 @@ class CalcPerson(object):
         for i in range(len(merge_list[0])):
             pccs.extend([pearsonr(self.get_regular_pearson_x(merge_list,i,0),self.get_regular_pearson_x(merge_list,i,1))[0]]*len(merge_list[0][i]))
             pep_len=len(merge_list[0][i])+1
+            peplens.extend([pep_len]*len(merge_list[0][i]))
             for j in range(len(pep_len_list)):
                 if pep_len>pep_len_list[j] and pep_len<=pep_len_list[j+1]:
                     _s_pear=pearsonr(self.get_regular_pearson_x(merge_list,i,0),self.get_regular_pearson_x(merge_list,i,1))[0]
-                   
                     if np.isnan(_s_pear):
                         continue
-                    
                     else:
-                       
                         _key=str(pep_len_list[j]+1)+'-'+str(pep_len_list[j+1])
                         if _key in person_list_dic:
                             person_list_dic[_key].append(_s_pear)
-                          
-                          
                         else:
                             person_list_dic[_key]=[]
                             person_list_dic[_key].append(_s_pear)
-                         
                     break
-           
-       
        
         _list=[]
-     
-        _contrast = pd.DataFrame({"Number":test_idx,"Peptide":peptide,"pred1":np.array(pred)[:,0].tolist(),"pred2":np.array(pred)[:,1].tolist(),"real1":test_y[:,0].tolist(),"real2":test_y[:,1].tolist(),"PCC":pccs})
-        _contrast.to_csv('data//internal_contrast.csv',index=False)
+        if self.ion_type=='internal': 
+            _contrast = pd.DataFrame({"Number":test_idx,"Peptide":peptide,"pred1":np.array(pred)[:,0].tolist(),"pred2":np.array(pred)[:,1].tolist(),"real1":test_y[:,0].tolist(),"real2":test_y[:,1].tolist(),"PCC":pccs,"LEN":peplens})
+            _contrast.to_csv('data//internal_pred.csv',index=False)
+        elif self.ion_type=='regular': 
+            _contrast = pd.DataFrame({"Number":test_idx,"Peptide":peptide,"predB1":np.array(pred)[:,0].tolist(),"predB2":np.array(pred)[:,1].tolist(),"predY1":np.array(pred)[:,2].tolist(),"predY2":np.array(pred)[:,3].tolist(),"realB1":test_y[:,0].tolist(),"realB2":test_y[:,1].tolist(),"realY1":test_y[:,2].tolist(),"realY2":test_y[:,3].tolist(),"PCC":pccs,"LEN":peplens})
+            _contrast.to_csv('data//regular_pred.csv',index=False)
         for key,value in person_list_dic.items():
             _list.extend(value)
             
@@ -207,6 +203,6 @@ class CalcPerson(object):
         elif self.ion_type == 'regular':
             pred = pd.DataFrame({"Number":test_idx,"Peptide":peptide,"IntensityB1":np.array(dtrain_predictions)[:,0].tolist(),"IntensityB2":np.array(dtrain_predictions)[:,1].tolist(),"IntensityY1":np.array(dtrain_predictions)[:,2].tolist(),"IntensityY2":np.array(dtrain_predictions)[:,3].tolist()})
 
-        pred.to_csv('data//pred.csv',index=False)
+        #pred.to_csv('data//pred.csv',index=False)
         return pred
    

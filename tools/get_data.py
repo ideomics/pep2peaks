@@ -1146,21 +1146,7 @@ class GetData(object):
         vertor.extend(v_t)
 
         labels=[float(f_line[6].split(',')[0]),float(f_line[6].split(',')[1]),float(f_line[6].split(',')[2]),float(f_line[6].split(',')[3].replace('\n',''))]
-        
-        #if is_train:
-        #    v_t=[0]*4
-         #   for k in range(self.number_label):
-          #      if labels[k]>0.0:
-           #         v_t[k]=1
-        #    vertor.extend(v_t)
-     #   else:
-      #      v_t=classes.split('\t')[1].replace('\n','').split(',')
-    #        vertor.extend([int(float(_v)) for _v in v_t])
-
-        
-        
-
-        
+      
         
         return f_line[0],vertor,labels,charge
     def ion_b_y_featurize_4label_for_classfication(self,line,fragmentation_window_size=1):
@@ -1926,29 +1912,40 @@ class GetData(object):
         #    plt.plot(np.linspace(0,1,num=num),cunt,label=str(i))
         #plt.legend()
         plt.show()
-    def get_data(self,path,internal_len):
+    def get_data(self,path,min_internal_len,max_internal_len):
         print('loading data...')
         X=[];y=[];idx=[];cunt=0;peptides=[];ions_len=[]
-        with open(path,'r') as rf:
-            while True:
-                line=rf.readline()
-                if not line:
-                    break
-                if len(line.split('\t')[2])==1 or len(line.split('\t')[2])==2:
-                    if self.ion_type == 'internal':
+        if self.ion_type == 'internal': 
+            with open(path,'r') as rf:
+                while True:
+                    line=rf.readline()
+                    if not line:
+                        break
+                    if len(line.split('\t')[2])>=min_internal_len and len(line.split('\t')[2])<=max_internal_len:
                         pep,vertor,label,charge,ion_len=self.ion_ay_by_featurize_2label(line)
                         ions_len.append(ion_len)
-                    elif self.ion_type == 'regular':
-                        pep,vertor,label,charge=self.ion_b_y_featurize_4label(line)
+                        cunt+=1
+                        X.append(vertor)
+                        y.append(label)
+                        peptides.append(pep+'#'+str(charge))
+                        
+                        idx.append(cunt)
+                   
+                    
+        elif self.ion_type == 'regular':
+            with open(path,'r') as rf:
+                while True:
+                    line=rf.readline()
+                    if not line:
+                        break
+                    pep,vertor,label,charge=self.ion_b_y_featurize_4label(line)
                     
                     cunt+=1
                     X.append(vertor)
                     y.append(label)
                     peptides.append(pep+'#'+str(charge))
                     
-                    idx.append(cunt)
-    
-       
+                    idx.append(cunt) 
         if self.ion_type == 'internal':
             merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"IonLen":ions_len,"IntensityBy":np.array(y)[:,0].tolist(),"IntensityAy":np.array(y)[:,1].tolist()})
        
@@ -1956,7 +1953,7 @@ class GetData(object):
             merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"IntensityB1":np.array(y)[:,0].tolist(),"IntensityB2":np.array(y)[:,1].tolist(),"IntensityY1":np.array(y)[:,2].tolist(),"IntensityY2":np.array(y)[:,3].tolist()})
        
         merge_list=self.merge_list_ap(merge_dataframe)
-        return np.array(idx),np.array(peptides),self.vertor_normalize(np.array(X,dtype=np.float32)),np.array(y),merge_list,ions_len
+        return np.array(idx),np.array(peptides),np.array(X,dtype=np.float32),np.array(y),merge_list,ions_len
     def get_features(self,path):
         print('loading data...')
         X=[];y=[];idx=[];cunt=0;peptides=[]
