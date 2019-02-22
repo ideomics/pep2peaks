@@ -40,10 +40,12 @@ The prediction script is located in model/pep2peaks.py, and the parameter is_tra
 	
 In addition, whether it is training or prediction, different parameters need to be set for different ion types.<br/><br/>
 For training or prediction of regular ions, you need to set:<br/>
+
 	*ion_type=regular<br/>
 	*input_dim=188<br/>
 	*output_dim=4<br/>
-For training or prediction of internal ions, you need to set:<br/>		
+For training or prediction of internal ions, you need to set:<br/>	
+
 	*ion_type=internal<br/>
 	*input_dim=217<br/>
 	*output_dim=2<br/>
