@@ -33,8 +33,8 @@
 	AELFLR	2	ELFL	NULL	0.0,0.0	y5b5+,y5a5+	0.0,0.0	0.0,0.0
 	
 #### 3,use pep2peaks.<br/>
-	The models that have been trained in this project are stored in the models/.<br/>
-	For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.<br/>
+The models that have been trained in this project are stored in the models/.<br/>
+For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.<br/>
 	
 >The prediction script is located in model/pep2peaks.py, and the parameter is_train is set to 2, indicating that only the test is performed, and the parameter model needs to be set. Indicates the location of the model. Set the parameter is_train to 1 if retraining is required.<br/>
 	
