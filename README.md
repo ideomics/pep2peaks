@@ -4,7 +4,7 @@ pep2peaks:Intensity prediction model of internal ions based on seq2seq
 
 1, Environmental requirements: python 3.5.2, tendorflow GPU 1.8.0
 
-2,Data 
+2,Data.
    The experimental data is a text document in .txt format. The content format is: 
    peptide(tab)charge[tab]ion[tab]modification[tab]ion-mass[tab]ion-type[tab]ion-relative-intensity[tab]ion-absolute-intensity 
 	
@@ -31,10 +31,7 @@ pep2peaks:Intensity prediction model of internal ions based on seq2seq
 	AELFLR	2	LFL	NULL	0.0,0.0	y4b5+,y4a5+	0.0,0.0	0.0,0.0	
 	AELFLR	2	ELFL	NULL	0.0,0.0	y5b5+,y5a5+	0.0,0.0	0.0,0.0
 	
-	
-	
-3,use pep2peaks
-
+3,use pep2peaks.
     The models that have been trained in this project are stored in the models/.
     For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.
 	
