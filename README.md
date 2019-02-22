@@ -34,6 +34,7 @@ pep2peaks:Intensity prediction model of internal ions based on seq2seq
 	
 	
 3,use pep2peaks
+
     The models that have been trained in this project are stored in the models/.
     For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.
 	
