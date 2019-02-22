@@ -36,20 +36,20 @@
 The models that have been trained in this project are stored in the models/.<br/>
 For the prediction of a single peptide, this project provides a sample interface located in example.py. For the prediction of multiple peptides, the peptide needs to be written into the file as shown above. You can also use scipt data_preprocessing/mm_data.py or data_preprocessing/proteometools_data.py which can generate the data needed for the experiment,the input files of the scripts are original spectrum files(.raw) and identification result files.<br/>
 	
->The prediction script is located in model/pep2peaks.py, and the parameter is_train is set to 2, indicating that only the test is performed, and the parameter model needs to be set. Indicates the location of the model. Set the parameter is_train to 1 if retraining is required.<br/>
+The prediction script is located in model/pep2peaks.py, and the parameter is_train is set to 2, indicating that only the test is performed, and the parameter model needs to be set. Indicates the location of the model. Set the parameter is_train to 1 if retraining is required.<br/>
 	
->In addition, whether it is training or prediction, different parameters need to be set for different ion types.<br/>
->For training or prediction of regular ions, you need to set:<br/>
+In addition, whether it is training or prediction, different parameters need to be set for different ion types.<br/><br/>
+For training or prediction of regular ions, you need to set:<br/>
 >>*ion_type=regular<br/>
 >>*input_dim=188<br/>
 >>*output_dim=4<br/>
->For training or prediction of internal ions, you need to set:<br/>		
+For training or prediction of internal ions, you need to set:<br/>		
 >>*ion_type=internal<br/>
 >>*input_dim=217<br/>
 >>*output_dim=2<br/>
 >>*min_internal_ion_len=？<br/>
 >>*max_internal_ion_len=？<br/>
->Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 188, and the input dimension of the internal ion is 217. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
+Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 188, and the input dimension of the internal ion is 217. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
 	
 #### contact:<br/>
 		hpwang@sdut.edu.cn<br/>
