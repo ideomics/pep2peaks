@@ -1,6 +1,6 @@
 # pep2peaks
 
-##pep2peaks:Intensity prediction model of internal ions based on seq2seq
+## pep2peaks:Intensity prediction model of internal ions based on seq2seq
 
 ###1, Environmental requirements: python 3.5.2, tendorflow GPU 1.8.0
 
