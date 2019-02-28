@@ -9,9 +9,7 @@ from tensorflow.python.ops import rnn, rnn_cell
 
 import random
 #############################################################
-
-
-class pep2inten(object):
+class pep2peaks(object):
     def __init__(self, args):
         self.input_dim = args.input_dim
         self.hidden_size = args.hidden_size
@@ -27,8 +25,9 @@ class pep2inten(object):
         self.batch_size=tf.placeholder(shape=None,dtype=tf.int32,name='batch_size')
         self.sequence_length = tf.placeholder(tf.int32, [None],name='sequence_length')
         self.encoder_inputs = tf.placeholder(tf.float32, shape=[None,None,self.input_dim], name="encoder_inputs") 
+       
         self.decoder_targets = tf.placeholder(tf.float32, [None,None,self.output_dim],name='decoder_targets')
-        self.pep2inten()
+        self.pep2peaks()
     def attention(self,atten_inputs, attention_size):
         with tf.variable_scope("attention"):
             inputs_hidden_size=6*self.hidden_size
@@ -63,13 +62,11 @@ class pep2inten(object):
         return muti_cells
     def encoder(self):
         with tf.variable_scope("encoder"):
-            norm_encoder_inputs=tf.cond(self.inference,
-                        lambda:tf.layers.batch_normalization(self.encoder_inputs ,training=False),
-                        lambda:tf.layers.batch_normalization(self.encoder_inputs ,training=True))
+           
             (encoder_fw_outputs, encoder_bw_outputs), (encoder_fw_final_state, encoder_bw_final_state) = \
                 tf.nn.bidirectional_dynamic_rnn(cell_fw=self.get_cell(self.hidden_size,self.num_layers),
                                                 cell_bw=self.get_cell(self.hidden_size,self.num_layers),
-                                                inputs=norm_encoder_inputs,
+                                                inputs=self.encoder_inputs,
                                                 sequence_length=self.sequence_length,
                                                 dtype=tf.float32, time_major=False)
             encoder_outputs=tf.concat([encoder_fw_outputs, encoder_bw_outputs],axis=2)
@@ -89,8 +86,6 @@ class pep2inten(object):
             atten_outputs=self.attention(atten_inputs,self.hidden_size)
 
             decoder_initial_inputs=tf.concat([atten_outputs,hidden_state],axis=2)
-            
-          
           
             decoder_outputs,_=tf.nn.dynamic_rnn(cell=self.get_cell(decoder_hidden_size,self.num_layers),
                                                 inputs=decoder_initial_inputs,
@@ -102,9 +97,9 @@ class pep2inten(object):
             finally_outputs=tf.layers.dense(inputs=outputs,units=self.output_dim,kernel_regularizer=tf.contrib.layers.l1_regularizer(self.l1_lamda))
             return  finally_outputs
    
-    def pep2inten(self):
+    def pep2peaks(self):
        
-        with tf.variable_scope('pep2inten'): 
+        with tf.variable_scope('pep2peaks'): 
             encoder_outputs,hidden_state=self.encoder()
             self.decoder_prediction=self.decoder(encoder_outputs,hidden_state)
 
@@ -120,10 +115,11 @@ class pep2inten(object):
            
             tf.summary.scalar('loss', self.loss)
             tf.add_to_collection('loss', self.loss)
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
+        #update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        #with tf.control_dependencies(update_ops):
+        with tf.variable_scope('train_op'):
             self.train_op = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(loss=self.loss)
-            tf.add_to_collection('tain_op', self.train_op)
+            tf.add_to_collection('train_op', self.train_op)
         self.summary_op = tf.summary.merge_all()
         self.saver = tf.train.Saver(tf.global_variables()) 
    

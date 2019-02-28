@@ -176,4 +176,4 @@ def closest_mz(mzs,val):
 if __name__=='__main__':
     #ESFADVLPEAAALVK
     #YKFILFGLNDAK
-    get_all_by('VLDDTmAVADILTSmVVDVSDLLDQAR',1,2)
+    get_y_and_b('VLYTPEIAENQQmISLLSPFQNK')

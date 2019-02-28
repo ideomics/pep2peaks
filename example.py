@@ -82,7 +82,7 @@ class example(object):
         print('predicting..')
         ions_number=len(self.peptide)-1 
         #regular
-        model=pep2inten(self.parse_args(188,4))
+        model=pep2peaks(self.parse_args(188,4))
         regular_mzs=[];regular_ion_type=[]
         bs,bs_mass,b_name,ys,ys_mass,y_name=get_y_and_b(self.peptide)
         bs1_mz=np.array(bs_mass)+self.PROTON
@@ -115,7 +115,7 @@ class example(object):
                 regular_pred.extend(np.array(pred)[:,k].tolist())
         tf.reset_default_graph()        
         #internal
-        model=pep2inten(self.parse_args(217,2))
+        model=pep2peaks(self.parse_args(217,2))
         internal_mzs=[];internal_ion_type=[]
         bys,bys_mass,bys_name=get_all_by(self.peptide,self.internal_ion_min_length,self.internal_ion_max_length)
         bys_mz=np.array(bys_mass)+self.PROTON

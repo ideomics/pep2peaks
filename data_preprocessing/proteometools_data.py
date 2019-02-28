@@ -444,31 +444,41 @@ class proteome_tools_data():
 
         b_y_train_wf=open(ion_folder+'/b_y_train.txt','w')      
         b_y_test_wf=open(ion_folder+'/b_y_test.txt','w')
-        pep_temp=''
+
+        ay_by_train_wf=open(ion_folder+'/ay_by_train.txt','w')      
+        ay_by_test_wf=open(ion_folder+'/ay_by_test.txt','w')
+        print(len(match_b_y_result))
+        print(len(match_ay_by_result))
+
         for k in range(len(match_b_y_result)):
             a= random.random()
             if a<0.9:
                 for _list in match_b_y_result[k]:
                     b_y_train_wf.write('\t'.join(_list)+'\n')
-            else:
-                for _list in match_b_y_result[k]:
-                    b_y_test_wf.write('\t'.join(_list)+'\n') 
-        b_y_train_wf.close()
-        b_y_test_wf.close()
-
-        ay_by_train_wf=open(ion_folder+'/ay_by_train.txt','w')      
-        ay_by_test_wf=open(ion_folder+'/ay_by_test.txt','w')
-        pep_temp=''
-        for k in range(len(match_ay_by_result)):
-            a= random.random()
-            if a<0.9:
                 for _list in match_ay_by_result[k]:
                     ay_by_train_wf.write('\t'.join(_list)+'\n')
             else:
+                for _list in match_b_y_result[k]:
+                    b_y_test_wf.write('\t'.join(_list)+'\n') 
                 for _list in match_ay_by_result[k]:
                     ay_by_test_wf.write('\t'.join(_list)+'\n') 
+
+        b_y_train_wf.close()
+        b_y_test_wf.close()
         ay_by_train_wf.close()
         ay_by_test_wf.close()
+
+        
+        #pep_temp=''
+        #for k in range(len(match_ay_by_result)):
+        #    a= random.random()
+        #    if a<0.9:
+        #        for _list in match_ay_by_result[k]:
+        #            ay_by_train_wf.write('\t'.join(_list)+'\n')
+        #    else:
+        #        for _list in match_ay_by_result[k]:
+        #            ay_by_test_wf.write('\t'.join(_list)+'\n') 
+        #
 
 if __name__=='__main__':
     dissociation=['HCD']

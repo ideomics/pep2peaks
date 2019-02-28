@@ -143,7 +143,7 @@ class CalcPerson(object):
         _contrast.to_csv('data//_contrast.csv',index=False)
 
         _list=[]
-        with open('data/mm_b_y_peplen_pep2inten.txt','w') as f:
+        with open('data/mm_b_y_peplen_pep2peaks.txt','w') as f:
             f.write(str(cunt0_9)+','+str(cunt_all)+'\n')
             for key,value in person_list_dic.items():
                 _list.extend(value)
