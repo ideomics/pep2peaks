@@ -1,15 +1,15 @@
 # pep2peaks
 
-## [pep2peaks:Intensity prediction model of internal ions based on seq2seq](http://)
+## [pep2peaks: prediction of regular ions and internal ions in peptide MS/MS spectra based on seq2seq](http://)
 
 #### 1, Environmental requirements<br/>
 		python 3.5.2, tendorflow GPU 1.8.0
 
 #### 2,Data.<br/>
    The experimental data is a text document in .txt format. The content format is: 
-   peptide(tab)charge[tab]ion[tab]modification[tab]ion-mass[tab]ion-type[tab]ion-relative-intensity[tab]ion-absolute-intensity 
+   peptide[tab]charge[tab]ion[tab]modification[tab]ion-mass[tab]ion-type[tab]ion-relative-intensity[tab]ion-absolute-intensity 
 	
-   In the regular ion data, ions with 1 and 2 charges, while internal ions are only ions with 1 charge.
+   In the regular ion data, ions with 1 and 2 charges, while internal ions are only with 1 charge.
 
 	
 	example：
@@ -39,12 +39,12 @@ For the prediction of a single peptide, this project provides a sample interface
 The prediction script is located in model/pep2peaks.py, and the parameter is_train is set to 2, indicating that only the test is performed, and the parameter model needs to be set. Indicates the location of the model. Set the parameter is_train to 1 if retraining is required.<br/>
 	
 In addition, whether it is training or prediction, different parameters need to be set for different ion types.<br/><br/>
-For training or prediction of regular ions, you need to set:<br/>
+For regular ions, you need to set:<br/>
 
 	ion_type=regular
 	input_dim=188
 	output_dim=4
-For training or prediction of internal ions, you need to set:<br/>	
+For internal ions, you need to set:<br/>	
 
 	ion_type=internal
 	input_dim=217
@@ -54,5 +54,5 @@ For training or prediction of internal ions, you need to set:<br/>
 Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 188, and the input dimension of the internal ion is 217. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
 	
 #### contact:<br/>
-		hpwang@sdut.edu.cn<br/>
-		xzachariah0604@gmail.com<br/>
+		hpwang@sdut.edu.cn
+		xzachariah0604@gmail.com
