@@ -1,6 +1,6 @@
 # pep2peaks
 
-## [pep2peaks: prediction of regular ions and internal ions in peptide MS/MS spectra based on seq2seq](http://)
+## [pep2peaks: prediction of regular and internal fragment ion peaks in peptide MS/MS spectra based on seq2seq](http://)
 
 #### 1, Environmental requirements<br/>
 		python 3.5.2, tendorflow GPU 1.8.0
