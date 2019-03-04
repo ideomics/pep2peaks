@@ -8,7 +8,7 @@
 #### 2,Data.<br/>
    The experimental data is a text document in .txt format. 
    The content format of regular ions is: 
-   peptide[tab]charge[tab]ion[tab]modification[tab]ion-type[tab]ion-relative-intensity[tab](intensity-contribution[tab])spectrum
+   peptide[tab]charge[tab]ion[tab]modification[tab]ion-type[tab]ion-relative-intensity[tab]spectrum
 	
    In the regular ion data, ions with 1 and 2 charges, while internal ions are only with 1 charge.
 
