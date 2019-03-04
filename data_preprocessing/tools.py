@@ -256,7 +256,7 @@ class data_tools(object):
             spectrum_mz=spectrum[:,0]
             ppm_error=((spectrum_mz-peak_mz)/peak_mz)*10**6
             index=np.where((ppm_error>=-20)&(ppm_error<=20))
-            if len(index[0])>0 and peak_inten>=inten_threshold:
+            if len(index[0])>0 or peak_inten<inten_threshold:
                 continue
             else:
                 random_peak=np.array(list(map(float,random_peak_line[3:])))
