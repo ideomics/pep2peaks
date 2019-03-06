@@ -8,6 +8,8 @@ import stat
 import subprocess
 from tools import *
 import random
+import  time
+from progressbar import *
 class proteome_tools_data():
     def __init__(self,_dis):
         '''
@@ -26,6 +28,7 @@ class proteome_tools_data():
         'data/pre_data/ProteomeToolsData/result/mgf_result/NCE*/b_y.txt'
        
         '''
+        
         self.driver=""
         self.data_tools=data_tools()
         #self.data_tools.delete_all(self.driver+'data/pre_data/ProteomeToolsData/result/')
@@ -36,7 +39,7 @@ class proteome_tools_data():
         self.raw_folder=self.driver+'data/pre_data/ProteomeToolsData/InitialFile/raw/'+self.dissociation
         self.raw_to_mgf_folder=self.data_tools.makedir('data/pre_data/ProteomeToolsData/raw_to_mgf/'+self.dissociation)
         
-        self.inten_thresholds=np.linspace(0.0001,0.01,100).tolist()
+        self.inten_thresholds=np.linspace(0.0,0.02,40).tolist()
         self.ion_type=['b+','b++','y+','y++','ay+','by+'] 
         self.charge=[2,3,4,5]
         self.nce=[25,30,35]
@@ -50,10 +53,12 @@ class proteome_tools_data():
         #print('################ Phase 1 #################')
         #self.get_nce()
         #self.new_extracted_mgf()
-        print('################ Phase 2 #################')
+        #print('################ Phase 2 #################')
         #self.read_mgf(self.mgf_folder)
-        print('################ Phase 3 #################')
-        self.ion_run('spectrum_fdr')
+        #print('################ Phase 3 #################')
+        #self.ion_run()
+        print('################ calc spectrum fdr #################')
+        self.spectrum_fdr()
 
     
     
@@ -301,8 +306,6 @@ class proteome_tools_data():
         
     def ion_run(self,type):
         spectrum_files,spectrum_names=self.data_tools.get_files(self.spectrum_folder)
-        f_=open('data/pre_data/ProteomeToolsData/annotated_peaks.txt','r') 
-        annotated_peaks=f_.readlines()
         for _nce in self.nce:
             print(' NCE '+str(_nce))
             for spectrum_file_index in range(len(spectrum_files)):
@@ -313,20 +316,11 @@ class proteome_tools_data():
                 self.psms=self.data_tools.get_psms(psms_file[0])
                 print('   --use ' + psms_file[0])
                 self.spectrums=self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'proteometools')
-                if type=='match':
-                    self.match_psms_with_spectra(self.data_tools.makedir(_folder+'/all_charge/match_ion'))
-                elif type=='spectrum_fdr':
-                    self.data_tools.makedir('data\pre_data\ProteomeToolsData/spectrum_fdr')
-                    f=open('data\pre_data\ProteomeToolsData/spectrum_fdr/fdr_'+os.path.splitext(spectrum_names[spectrum_file_index])[0]+'_NCE_'+str(_nce)+'.txt','w')
-                    f.close()
-                    f=open('data\pre_data\ProteomeToolsData/spectrum_fdr/fdr_'+os.path.splitext(spectrum_names[spectrum_file_index])[0]+'_NCE_'+str(_nce)+'.txt','a')
-                    self.psms=random.sample(self.psms, 2)
-                    for inten_threshold in self.inten_thresholds:
-                        self.spectra_fdr(inten_threshold,f,annotated_peaks)
+                self.match_psms_with_spectra(self.data_tools.makedir(_folder+'/all_charge/match_ion'))
+                
                 print('   ######################################')
-        if  type=='match':
-            with open('data/pre_data/ProteomeToolsData/annotated_peaks.txt','a') as f:
-                f.write(str(self.annotated_peaks_count))
+        with open('data/pre_data/ProteomeToolsData/annotated_peaks.txt','a') as f:
+            f.write(str(self.annotated_peaks_count))
     
     #def match_psms_with_spectra2(self,ion_folder):
     #    sum_of_intensity=0.0
@@ -436,64 +430,127 @@ class proteome_tools_data():
         b_y_test_wf.close()
         ay_by_train_wf.close()
         ay_by_test_wf.close()
-
-    def spectra_fdr(self,inten_threshold,file,annotated_peaks):
-       
-       
+    
+    def spectrum_fdr(self):
+        spectrum_files,spectrum_names=self.data_tools.get_files(self.spectrum_folder)
         
-        for psm in self.psms:
-            spec_name=psm[0]+'#'+psm[4]
-            if spec_name in self.spectrums.keys():
-                _spectrum=np.array(self.spectrums[spec_name])
-                regular_true_annotated=0;regular_false_annotated=0;internal_true_annotated=0;internal_false_annotated=0
-                for times in range(2000):
-             
-                    noised_spectrum=self.data_tools.noise_spectrum(annotated_peaks,_spectrum,inten_threshold)
-                    
-                    peptide=psm[2]
+        f_=open('data/pre_data/ProteomeToolsData/annotated_peaks.txt','r') 
+        annotated_peaks=f_.readlines()
+        self.spectrums=defaultdict(list)
+        pbar = ProgressBar(widgets=['Read Spectrum files',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
+        for spectrum_file_index in range(len(spectrum_files)):
+            pbar.update(int((spectrum_file_index / (len(spectrum_files) - 1)) * 100))
+            spectrum=self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'proteometools',True)
+            self.data_tools.makedir('data\pre_data\ProteomeToolsData/spectrum_fdr')
+            if len(spectrum)>0:
+                self.spectrums.update(spectrum)
+        pbar.finish()
+        f=open('data\pre_data\ProteomeToolsData/spectrum_fdr/fdrs.txt','a')
+        random_keys=random.sample(self.spectrums.keys(), 1000)
+
+
+        #num_of_spectrum=len(self.spectrums)
+        #print(num_of_spectrum)
+        cunt=1;random_key_index_set=[]
+        #while cunt<1000:
+        #    random_key_index=random.randint(0,num_of_spectrum-1)
+        #    if random_key_index not in random_key_index_set:
+         #       random_key_index_set.append(random_key_index) 
+        #        random_key=list(self.spectrums.keys())[random_key_index]
+        pbar = ProgressBar(widgets = ['Processed Spectrum:',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
+        for i in range(len(random_keys)):       
+            pbar.update(int((i / (len(random_keys) - 1)) * 100))
+            self.calc_fdr(f,annotated_peaks,random_keys[i])
+            cunt+=1
+        #    else:
+        #        continue
+        pbar.finish() 
+        f.close()
+        print('   ######################################')
+  
+    def calc_fdr(self,file,annotated_peaks,random_key):
+       
+        _spectrum=np.array(self.spectrums[random_key])
+        peptide=random_key.split('#')[2]
+        regular_matched_inten=[];regular_matched_flag=[];internal_matched_inten=[];internal_matched_flag=[]
+        
+        for times in range(2000):
             
-                    charge=psm[1]
-                    ions_b_y,ions_a,ions_ay_by=self.data_tools.get_ions_list(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
+            noised_spectrum=self.data_tools.noise_spectrum(annotated_peaks,_spectrum)
+           
+            ions_b_y,ions_a,ions_ay_by=self.data_tools.get_ions_list(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
 
-                    #ions match
+            #ions match
 
-                     #b+,b++,y+,y++
-                    for i in range(len(peptide)-1):
-                        for j in range(4):
-                            
-                            index,_ppm=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_b_y[j][1][i])
-                            if index!=-1:
-                                if noised_spectrum[index][4]==1.0:
-                                    regular_true_annotated += 1
-                                elif  noised_spectrum[index][4]==0.0:
-                                     regular_false_annotated += 1
-                                noised_spectrum = np.delete(noised_spectrum, index, 0)
-                               
+             #b+,b++,y+,y++
+            for i in range(len(peptide)-1):
+                for j in range(4):
+                    
+                    index,_ppm=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_b_y[j][1][i])
+                    if index!=-1:
+                       
+                        regular_matched_inten.append(noised_spectrum[index][2])
+                        regular_matched_flag.append(noised_spectrum[index][4])
+                        #if noised_spectrum[index][4]==1.0:
+                        #    regular_true_annotated += 1
+                        #elif  noised_spectrum[index][4]==0.0:
+                        #     regular_false_annotated += 1
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
+                       
 
-                   #a+,a++
-                 
-                    for i in range(len(peptide)-1):
-                        for j in range(2):
-                            index,_=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_a[j][1][i])
-                            if index!=-1:
-                                noised_spectrum = np.delete(noised_spectrum, index, 0)
+           #a+,a++
+         
+            for i in range(len(peptide)-1):
+                for j in range(2):
+                    index,_=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_a[j][1][i])
+                    if index!=-1:
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
 
-                    #ay+ by+
-                    for i in range(len(ions_ay_by[0][1])):
-                        for j in range(2):
-                            index,_ppm_i=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_ay_by[j][1][i])
-                            if index!=-1:
-                                if noised_spectrum[index][4]==1.0:
-                                    internal_true_annotated += 1
-                                elif  noised_spectrum[index][4]==0.0:
-                                    internal_false_annotated += 1
-                                noised_spectrum = np.delete(noised_spectrum, index, 0)
-               
-                #try:
-                write_str=spec_name+'\t'+str(inten_threshold)+'\t'+str(regular_true_annotated)+'\t'+str(regular_false_annotated)+'\t'+str(float(regular_false_annotated/regular_true_annotated))+'\t'+str(internal_true_annotated)+'\t'+str(internal_false_annotated)+'\t'+str(float(internal_false_annotated/internal_true_annotated))+'\t'+str(float((regular_false_annotated+internal_false_annotated)/(regular_true_annotated+internal_true_annotated)))+'\n'
-                file.write(write_str)
-               # except:
-                  #  continue
+            #ay+ by+
+            for i in range(len(ions_ay_by[0][1])):
+                for j in range(2):
+                    index,_ppm_i=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_ay_by[j][1][i])
+                    if index!=-1:
+                        internal_matched_inten.append(noised_spectrum[index][2])
+                        internal_matched_flag.append(noised_spectrum[index][4])
+                        #if noised_spectrum[index][4]==1.0:
+                        #    internal_true_annotated += 1
+                        #elif  noised_spectrum[index][4]==0.0:
+                        #    internal_false_annotated += 1
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
+        
+        for inten_threshold in self.inten_thresholds:
+            
+            internal_index=np.where(np.array(internal_matched_inten)>=inten_threshold)[0]
+            #print(len(internal_index))
+            internal_true_annotated=len(np.where(np.array(internal_matched_flag)[internal_index]==1.0)[0])
+            internal_false_annotated=len(internal_index)-internal_true_annotated
+
+           
+          
+            regular_index=np.where(np.array(regular_matched_inten)>=inten_threshold)[0]
+            #print(len(regular_index))
+            regular_true_annotated=len(np.where(np.array(regular_matched_flag)[regular_index]==1.0)[0])
+            regular_false_annotated=len(regular_index)-regular_true_annotated
+
+            
+            #print(random_key+'\t'+str(inten_threshold)+'\t'+str(regular_true_annotated)+'\t'+str(regular_false_annotated)+'\t'+str(internal_true_annotated)+'\t'+str(internal_false_annotated))
+            if regular_true_annotated==0:
+                regular_fdr=0.0
+            else:
+                regular_fdr=regular_false_annotated/regular_true_annotated
+            if internal_true_annotated==0:
+                internal_fdr=0.0
+            else:
+                internal_fdr=internal_false_annotated/internal_true_annotated
+            if regular_true_annotated+internal_true_annotated==0:
+                both_fdr=0.0
+            else:
+                both_fdr=(regular_false_annotated+internal_false_annotated)/(regular_true_annotated+internal_true_annotated)
+            write_str=random_key+'\t'+str(inten_threshold)+'\t'+str(regular_true_annotated)+'\t'+str(regular_false_annotated)+'\t'+str(regular_fdr)+'\t'+str(internal_true_annotated)+'\t'+str(internal_false_annotated)+'\t'+str(internal_fdr)+'\t'+str(both_fdr)+'\n'
+            file.write(write_str)
+       # except:
+          #  continue
                
 
 if __name__=='__main__':

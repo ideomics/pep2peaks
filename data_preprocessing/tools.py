@@ -3,6 +3,7 @@ from collections import defaultdict
 import numpy as np
 import random
 import linecache
+
 class data_tools(object):
     def __init__(self, **kwargs):
         
@@ -52,7 +53,7 @@ class data_tools(object):
                 names.append(_list[i])
         return files,names
 
-    def get_spectrums(self,file_name,_type):
+    def get_spectrums(self,file_name,_type,is_calc_fdr=False):
             dic=defaultdict(list)
             with open(file_name,'r') as rf:
                 while True:
@@ -63,9 +64,10 @@ class data_tools(object):
                         
                         line=rf.readline()
                         _spec_t=line.split('=')[1].replace("\n", "")
-                        
-                        for step in range(2):
-                            rf.__next__()
+                        peptide=rf.readline().split('=')[1].replace("\n", "")
+                        if is_calc_fdr and len(peptide)!=15:
+                            continue
+                        rf.__next__()
                         if _type=='proteometools':
                             rf.__next__()
                         if _type=='mm':
@@ -73,6 +75,8 @@ class data_tools(object):
                         else:
                             _nce=int(rf.readline().split('=')[1].replace("\n", ""))
                         _spec=_spec_t+'#'+str(_nce)
+                        if is_calc_fdr:
+                            _spec=_spec_t+'#'+str(_nce)+'#'+peptide
                         dic[_spec]=[]
                         if _type=='proteometools':
                             for step in range(2):
@@ -89,6 +93,7 @@ class data_tools(object):
                             temp_list.append(temp_)
                             line=rf.readline()
                         max_=max(np.array(temp_list)[:,1])
+                      
                         for i in range(len(temp_list)):
                             temp_list[i].append(float(temp_list[i][1]/max_))
                             temp_list[i].append(max_)
@@ -172,7 +177,6 @@ class data_tools(object):
         #print(ays_mz.tolist())
         #print(_name)
         return bys,bys_mass,_name
-
     def closest_mz(self,mzs,val):
        
         mz=mzs[:,0]
@@ -238,25 +242,26 @@ class data_tools(object):
         ions_ay_by.append([bys,ays_mz,[_name.replace('b','a')+'+' for _name in bys_name]])
         return ions_b_y,ions_a,ions_ay_by
 
-    def noise_spectrum(self,annotated_peaks,spectrum,inten_threshold):
+    def noise_spectrum(self,annotated_peaks,spectrum):
         peaks_count= int(annotated_peaks[-1])
         #random_peaks=random.sample(list(range(1,peaks_count)))
        
-        for i in range(len(spectrum)):
-            if spectrum[i][1]<inten_threshold:
-                spectrum = np.delete(spectrum, i, 0)
+        #for i in range(len(spectrum)):
+        #    if spectrum[i][1]<inten_threshold:
+        #        spectrum = np.delete(spectrum, i, 0)
         spectrum=np.insert(spectrum, 4, values=1, axis=1)          
         
         selected_peaks=0
         while selected_peaks<10:
             random_line_num=random.randint(1,peaks_count-1)
+            #print(random_line_num)
             random_peak_line=annotated_peaks[random_line_num].strip('\n').split('\t')
             peak_mz=float(random_peak_line[3])
             peak_inten=float(random_peak_line[5])
             spectrum_mz=spectrum[:,0]
             ppm_error=((spectrum_mz-peak_mz)/peak_mz)*10**6
             index=np.where((ppm_error>=-20)&(ppm_error<=20))
-            if len(index[0])>0 or peak_inten<inten_threshold:
+            if len(index[0])>0:
                 continue
             else:
                 random_peak=np.array(list(map(float,random_peak_line[3:])))

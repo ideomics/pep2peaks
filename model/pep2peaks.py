@@ -12,8 +12,8 @@ os.sys.path.append(os.path.join( os.path.dirname(__file__), '..'))
 from tools.get_data import *
 from tools.pearson import *
 from model import *
-
-seed = 42
+from progressbar import *
+seed = 64
 np.random.seed(seed)
 tf.set_random_seed(seed)
 
@@ -97,14 +97,17 @@ def train(args):
         val_batch_peptide,val_batch_number,val_seq_length=get_batch_peptide(merge_val_list,args.batch_size,False)
         
         print('..trainning')
-        best_loss=1000.0;
+        best_loss=1000.0
+        
         for Iter in range(args.num_iter):
             train_loss=0
             per_80=int(len(batch_peptide)*0.8)
             permutation_batch = np.random.permutation(len(batch_peptide))[:per_80]
             suffled_batch_peptide=np.array(batch_peptide)[permutation_batch].tolist()
             suffled_seq_length=np.array(seq_length)[permutation_batch].tolist()
+            pbar = ProgressBar(widgets=['Training',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
             for i,(train_piptide_index) in enumerate(suffled_batch_peptide):
+                pbar.update(int((i / (len(suffled_batch_peptide) - 1)) * 100))
                 encoder_inputs=[];decoder_inputs=[];decoder_targets=[]
                 max_ions_number=max(suffled_seq_length[i])
                 permutation_peptide = np.random.permutation(len(train_piptide_index))
@@ -116,9 +119,11 @@ def train(args):
                     decoder_targets.append(padding_data(train_y[np.array(train_ion_index)],max_ions_number,True))
                 loss,train_summary=model.train(sess, max_ions_number,np.array(encoder_inputs),np.array(decoder_targets),suffled_seq)
                 train_loss+=loss
-
+            pbar.finish()
             val_loss=0
+            pbar = ProgressBar(widgets=['Validating',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
             for i, val_piptide_index in enumerate(val_batch_peptide):
+                pbar.update(int((i / (len(val_batch_peptide) - 1)) * 100))
                 encoder_inputs=[];decoder_inputs=[];decoder_targets=[]
                 max_ions_number=max(val_seq_length[i])
                 for j in range(len(val_piptide_index)):
@@ -127,7 +132,7 @@ def train(args):
                     decoder_targets.append(padding_data(val_y[np.array(train_ion_index)],max_ions_number,True))
                 loss_val,_=model.eval(sess, max_ions_number,np.array(encoder_inputs),np.array(decoder_targets),val_seq_length[i])
                 val_loss+=loss_val
-            
+            pbar.finish() 
             print('Iter:{0}/{1}  train loss:{2:.4} val loss:{3:.4}'.format(Iter+1,args.num_iter,(train_loss/_batch_number),(val_loss/val_batch_number)))
             if best_loss > val_loss/val_batch_number:
                 best_loss=val_loss/val_batch_number

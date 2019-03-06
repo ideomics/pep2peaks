@@ -3,31 +3,17 @@ import os
 from tools import *
 class data_preprocessing(object):
     def __init__(self,mgf_name):
+        self.data_tools=data_tools()
         _sqt='data/pre_data/MMdata/comet/'+mgf_name+'/'
         _dat='data/pre_data/MMdata/mascot/'+mgf_name+'/'
         _txt='data/pre_data/MMdata/pFind/'+mgf_name+'/'
         self.mgf_name=mgf_name
-        self.comet_sqt=makedir(_sqt)
-        self.mascot_dat=makedir(_dat)
-        self.pfind_txt=makedir(_txt)
-        makedir('data/pre_data/MMdata/3result')
+        self.comet_sqt=self.data_tools.makedir(_sqt)
+        self.mascot_dat=self.data_tools.makedir(_dat)
+        self.pfind_txt=self.data_tools.makedir(_txt)
+        self.data_tools.makedir('data/pre_data/MMdata/3result')
         self.mgf_folder='data/pre_data/MMdata/mgf/'+mgf_name+'/'
-        self.dicM={'A':71.037114,'C':103.009185,'D':115.026943,'E':129.042593,'F':147.068414,\
-      'G':57.021464,'H':137.058912,'I':113.084064,'K':128.094963,'L':113.084064,\
-      'M':131.040485,'N':114.042927,'P':97.052764,'Q':128.058578,'R':156.101111,\
-      'S':87.032028,'T':101.047678,'V':99.068414,'W':186.079313,'Y':163.063329,\
-       'c':160.0306486796,'m':147.035399708,'n':115.026943025
-      }
-        self.PROTON= 1.007276466583
-        self.H = 1.0078250322
-        self.O = 15.9949146221
-        
-        self.N = 14.0030740052
-        self.C = 12.00
-        self.isotope = 1.003
-
-        self.CO = self.C + self.O
-        self.H2O= self.H * 2 + self.O
+       
         self.internal_ion_max_length=8
         self.internal_ion_min_length=1
         self.charge=[2,3]
@@ -44,12 +30,12 @@ class data_preprocessing(object):
         #self.remove_decoy_redundant()
         #self.psms_mpc_classify()
         ###########################
-
+		self.annotated_peaks_count=0
         self.ion_run()
 
     def pep2_proteins_to_psms(self,_proteins_files,_psms_files,write_files,charge):
-        proteins_files,proteins_names=get_files(_proteins_files)
-        psms_files,psms_names=get_files(_psms_files)
+        proteins_files,proteins_names=self.data_tools.get_files(_proteins_files)
+        psms_files,psms_names=self.data_tools.get_files(_psms_files)
         for file_index in range(len(proteins_files)):
             f_proteins = open(proteins_files[file_index])
             if psms_names[file_index].split('_')[2] in proteins_names[file_index]:
@@ -57,7 +43,7 @@ class data_preprocessing(object):
             else:
                 print('false')
             f_psms = open(psms_files[file_index])
-            fr_folder=makedir(write_files+'/proteins_to_psms_charge'+str(charge))
+            fr_folder=self.data_tools.makedir(write_files+'/proteins_to_psms_charge'+str(charge))
             fr = open(fr_folder+'/proteins_to_psms_'+psms_names[file_index].split('_')[2]+'_charge'+str(charge)+'.txt','w')
 
             sequence = []
@@ -79,10 +65,10 @@ class data_preprocessing(object):
             f_psms.close()
             fr.close()
     def pep2_proteins(self,read_files,write_files,charge):
-        files,names=get_files(read_files)
+        files,names=self.data_tools.get_files(read_files)
         for file_index in range(len(files)):
             f = open(files[file_index])
-            fr_folder=makedir(write_files+'/FDR0.01_all_pep2_proteins_charge'+str(charge))
+            fr_folder=self.data_tools.makedir(write_files+'/FDR0.01_all_pep2_proteins_charge'+str(charge))
             fr = open(fr_folder+'/FDR0.01_pep2_proteins_'+names[file_index].split('_')[2]+'_charge'+str(charge)+'.txt','w')
 
             for line in f:
@@ -98,10 +84,10 @@ class data_preprocessing(object):
             fr.close()
         self.pep2_proteins_to_psms(write_files+'/FDR0.01_all_pep2_proteins_charge'+str(charge),write_files+'/FDR0.01_all_charge'+str(charge),write_files,charge)
     def proteins(self,read_files,write_files,charge):
-        files,names=get_files(read_files)
+        files,names=self.data_tools.get_files(read_files)
         for file_index in range(len(files)):
             f = open(files[file_index])
-            fr_folder=makedir(write_files+'/FDR0.01_all_proteins_charge'+str(charge))
+            fr_folder=self.data_tools.makedir(write_files+'/FDR0.01_all_proteins_charge'+str(charge))
             fr = open(fr_folder+'/FDR0.01_proteins_'+names[file_index].split('_')[2]+'_charge'+str(charge)+'.txt','w')
 
             proteins = []
@@ -149,11 +135,11 @@ class data_preprocessing(object):
     def merge_spectrum_sequence_file(self,read_folder_list,write_foler,charge):
         filelist=[]
         for _folder in read_folder_list:
-            files,_=get_files(_folder)
+            files,_=self.data_tools.get_files(_folder)
             for file in files:
                 if 'charge'+str(charge) in file:
                     filelist.append(file) 
-        fr_folder=makedir(write_foler+'/charge'+str(charge))
+        fr_folder=self.data_tools.makedir(write_foler+'/charge'+str(charge))
         fr_file_name=fr_folder+'/spectrum_sequence_charge'+str(charge)+'.txt'
         newfile=open(fr_file_name,'w')
         for item in filelist:
@@ -169,7 +155,7 @@ class data_preprocessing(object):
             for charge in self.charge:
                 if 'charge'+str(charge) in f_name:
                     _folder+=str(charge)
-            fr_folder=makedir(write_files+_folder)
+            fr_folder=self.data_tools.makedir(write_files+_folder)
             fr_name = fr_folder+'/FDR0.01_'+names[file_index]
             f = open(f_name)
             fr = open(fr_name,'w')
@@ -200,12 +186,12 @@ class data_preprocessing(object):
             self.proteins(write_files+'/FDR0.01_all_charge'+str(charge),write_files,charge)
         #for charge in self.charge:
         #    print('merge all charge'+str(charge)+' files to folder FDR0.01_all_charge'+str(charge))
-        #    self.merge_file(write_files,makedir(write_files+'/FDR0.01_all_charge'+str(charge)),charge)
+        #    self.merge_file(write_files,self.data_tools.makedir(write_files+'/FDR0.01_all_charge'+str(charge)),charge)
 
     def extract_spectrum_sequence(self,psms_file_list,names,write_folder,software,charge):
         for index in range(len(psms_file_list)):
             f = open(psms_file_list[index])
-            _write_folder=makedir(write_folder+'/'+self.spectrum_sequence_folder)
+            _write_folder=self.data_tools.makedir(write_folder+'/'+self.spectrum_sequence_folder)
             
             fr = open(_write_folder+'/'+software+'_spectrum_sequence_'+names[index].split('_')[3]+'_charge'+str(charge)+'.txt','w')
 
@@ -219,7 +205,7 @@ class data_preprocessing(object):
         print('merge 3 result')
         for charge in self.charge:
             write_folder='data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/spectrum_result/charge'+str(charge)
-            makedir(write_folder)
+            self.data_tools.makedir(write_folder)
             f = open('data/pre_data/MMdata/3result/'+self.mgf_name+'/spectrum_sequence/charge'+str(charge)+'/spectrum_sequence_charge'+str(charge)+'.txt')
             f_mpc = open(write_folder+"/result_mpc.txt",'w')
             f_mp = open(write_folder+"/result_mp.txt",'w')
@@ -282,9 +268,9 @@ class data_preprocessing(object):
             for line in f_ss:
                 spectra.append(line.split('\t')[0])
             f_ss.close()
-            write_folder=makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/psms_result/charge'+str(charge))
+            write_folder=self.data_tools.makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/psms_result/charge'+str(charge))
             fr = open(write_folder+'/psms_mpc.txt',"w")
-            files,names=get_files('data/pre_data/MMdata/mascot/'+self.mgf_name+'/FDR0_01/proteins_to_psms_charge'+str(charge))
+            files,names=self.data_tools.get_files('data/pre_data/MMdata/mascot/'+self.mgf_name+'/FDR0_01/proteins_to_psms_charge'+str(charge))
             for file in files:
                 f_psms = open(file)
                 decoy = 0;target = 0
@@ -308,7 +294,7 @@ class data_preprocessing(object):
     def remove_decoy_redundant(self):
         for charge in self.charge:
             f = open('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/psms_result/charge'+str(charge)+'/psms_mpc.txt')
-            write_folder=makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/no_redundant_decoy_psms_result/charge'+str(charge))
+            write_folder=self.data_tools.makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/no_redundant_decoy_psms_result/charge'+str(charge))
             fr = open(write_folder+'/psms_mpc_no_redundant_decoy.txt','w')
 
             psms = [];peptides = []
@@ -353,7 +339,7 @@ class data_preprocessing(object):
     def psms_mpc_classify(self):
         for charge in self.charge:
             
-            write_folder=makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/finally_result/charge'+str(charge))
+            write_folder=self.data_tools.makedir('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/finally_result/charge'+str(charge))
             for _mgf in range(self.num_mgf): 
                 f = open('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/no_redundant_decoy_psms_result/charge'+str(charge)+'/psms_mpc_no_redundant_decoy.txt')
                 fr = open(write_folder+'/psms_'+self.mgf_name+str(_mgf+1)+'.txt','w')
@@ -369,43 +355,43 @@ class data_preprocessing(object):
     def data_run(self):
         spectrum_sequence_file_folder_list=[]
         #comet
-        files,names=get_files(self.comet_sqt+'sqt')
+        files,names=self.data_tools.get_files(self.comet_sqt+'sqt')
         self.num_mgf=len(files)
-        comet=_comet(files,names,makedir(self.comet_sqt+self.first_folder))
+        comet=_comet(files,names,self.data_tools.makedir(self.comet_sqt+self.first_folder))
         comet._comet_file()
-        files,names=get_files(self.comet_sqt+self.first_folder)
-        comet.comet_Sequence_modification(files,names,makedir(self.comet_sqt+self.mod_folder))
-        files,names=get_files(self.comet_sqt+self.mod_folder)
-        self.fdr_filter(files,names,makedir(self.comet_sqt+self.fdr_folder))
+        files,names=self.data_tools.get_files(self.comet_sqt+self.first_folder)
+        comet.comet_Sequence_modification(files,names,self.data_tools.makedir(self.comet_sqt+self.mod_folder))
+        files,names=self.data_tools.get_files(self.comet_sqt+self.mod_folder)
+        self.fdr_filter(files,names,self.data_tools.makedir(self.comet_sqt+self.fdr_folder))
         spectrum_sequence_file_folder_list.append(self.comet_sqt+'/'+self.spectrum_sequence_folder)
         for charge in self.charge:
-            files,names=get_files(self.comet_sqt+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
+            files,names=self.data_tools.get_files(self.comet_sqt+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
             self.extract_spectrum_sequence(files,names,self.comet_sqt,'Comet',charge)
         print('------------------end comet')
         #mascot
-        files,names=get_files(self.mascot_dat+'dat')
-        mascot=_mascot(files,names,makedir(self.mascot_dat+self.first_folder))
+        files,names=self.data_tools.get_files(self.mascot_dat+'dat')
+        mascot=_mascot(files,names,self.data_tools.makedir(self.mascot_dat+self.first_folder))
         mascot._mascot_file()
-        files,names=get_files(self.mascot_dat+self.first_folder)
-        mascot.mascot_change_format(files,names,makedir(self.mascot_dat+self.mod_folder))
-        files,names=get_files(self.mascot_dat+self.mod_folder)
-        self.fdr_filter(files,names,makedir(self.mascot_dat+self.fdr_folder))
+        files,names=self.data_tools.get_files(self.mascot_dat+self.first_folder)
+        mascot.mascot_change_format(files,names,self.data_tools.makedir(self.mascot_dat+self.mod_folder))
+        files,names=self.data_tools.get_files(self.mascot_dat+self.mod_folder)
+        self.fdr_filter(files,names,self.data_tools.makedir(self.mascot_dat+self.fdr_folder))
         spectrum_sequence_file_folder_list.append(self.mascot_dat+'/'+self.spectrum_sequence_folder)
         for charge in self.charge:
-            files,names=get_files(self.mascot_dat+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
+            files,names=self.data_tools.get_files(self.mascot_dat+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
             self.extract_spectrum_sequence(files,names,self.mascot_dat,'Mascot',charge)
         print('------------------end mascot')
         #pfind
-        files,names=get_files(self.pfind_txt+'txt')
-        pfind=_pFind(files,names,makedir(self.pfind_txt+self.first_folder))
+        files,names=self.data_tools.get_files(self.pfind_txt+'txt')
+        pfind=_pFind(files,names,self.data_tools.makedir(self.pfind_txt+self.first_folder))
         pfind._pfind_file()
-        files,names=get_files(self.pfind_txt+self.first_folder)
-        pfind.pFind_modification(files,names,makedir(self.pfind_txt+self.mod_folder))
-        files,names=get_files(self.pfind_txt+self.mod_folder)
-        self.fdr_filter(files,names,makedir(self.pfind_txt+self.fdr_folder))
+        files,names=self.data_tools.get_files(self.pfind_txt+self.first_folder)
+        pfind.pFind_modification(files,names,self.data_tools.makedir(self.pfind_txt+self.mod_folder))
+        files,names=self.data_tools.get_files(self.pfind_txt+self.mod_folder)
+        self.fdr_filter(files,names,self.data_tools.makedir(self.pfind_txt+self.fdr_folder))
         spectrum_sequence_file_folder_list.append(self.pfind_txt+'/'+self.spectrum_sequence_folder)
         for charge in self.charge:
-            files,names=get_files(self.pfind_txt+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
+            files,names=self.data_tools.get_files(self.pfind_txt+self.fdr_folder+'/proteins_to_psms_charge'+str(charge))
             self.extract_spectrum_sequence(files,names,self.pfind_txt,'pFind',charge)
         print('------------------end pfind')
 
@@ -417,7 +403,7 @@ class data_preprocessing(object):
         _folder='data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/finally_result/charge'
         for charge in self.charge:
             filelist.append(_folder+str(charge)+'/psms_'+spec_name+'.txt') 
-        fr_folder=makedir(_folder+'_all/'+spec_name)
+        fr_folder=self.data_tools.makedir(_folder+'_all/'+spec_name)
         fr_file_name=fr_folder+'/psms_all_charge.txt'
         with open(fr_file_name,'w') as newfile:
             for item in filelist:
@@ -425,16 +411,16 @@ class data_preprocessing(object):
                     newfile.write(txt)
 
     def ion_run(self):
-        spectrum_files,spectrum_names=get_files(self.mgf_folder)
+        spectrum_files,spectrum_names=self.data_tools.get_files(self.mgf_folder)
         for spectrum_file_index in range(len(spectrum_files)):
             print('   ######################################\n   --use ' + spectrum_files[spectrum_file_index])
-            _folder=makedir('data/pre_data/MMdata/matched_ion/'+os.path.splitext(spectrum_names[spectrum_file_index])[0])
+            _folder=self.data_tools.makedir('data/pre_data/MMdata/matched_ion/'+os.path.splitext(spectrum_names[spectrum_file_index])[0])
             self.merge_psms_charge_file(os.path.splitext(spectrum_names[spectrum_file_index])[0])
-            psms_file,_=get_files('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/finally_result/charge_all/'+os.path.splitext(spectrum_names[spectrum_file_index])[0])
-            self.psms=get_psms(psms_file[0])
+            psms_file,_=self.data_tools.get_files('data/pre_data/MMdata/3result/'+self.mgf_name+'/merge_result/finally_result/charge_all/'+os.path.splitext(spectrum_names[spectrum_file_index])[0])
+            self.psms=self.data_tools.get_psms(psms_file[0])
             print('   --use ' + psms_file[0])
-            self.spectrums=get_spectrums(spectrum_files[spectrum_file_index],'mm')
-            self.match_psms_with_spectra(makedir(_folder))
+            self.spectrums=self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'mm')
+            self.match_psms_with_spectra(self.data_tools.makedir(_folder))
             print('   ######################################')
     def match_psms_with_spectra2(self,ion_folder):
         sum_of_intensity=0.0
@@ -447,48 +433,19 @@ class data_preprocessing(object):
             wf.write(str(sum_of_intensity)+'\n')
     def match_psms_with_spectra(self,ion_folder):
        
-        match_b_y_result=[];spectrums=[]
-        match_ay_by_result=[]
+        annotated_peaks=open('data/pre_data/MMdata/annotated_peaks.txt','a') 
+        match_b_y_result=[];match_ay_by_result=[];spectrums_name=[]
         for psm in self.psms:
             spec_name=psm[0]+'#'+psm[4]
             if spec_name in self.spectrums.keys():
-                spectrums.append(spec_name)
+                spectrums_name.append(spec_name)
                 peptide=psm[2]
                 _spectrum=np.array(self.spectrums[spec_name])
                 charge=psm[1]
-               
-
-                ions_b_y=[];ions_a=[]
-                #b+/y+
-                bs,bs_mass,b_name,ys,ys_mass,y_name=get_y_and_b(peptide)
-                bs1_mz=np.array(bs_mass)+self.PROTON
-                ys1_mz=np.array(ys_mass)+self.H2O+self.PROTON
-                as1_mz=np.array(bs_mass)+self.PROTON-self.CO
-                #b++/y++
-                bs2_mz=(np.array(bs_mass)+2*self.PROTON)/2
-                ys2_mz=(np.array(ys_mass)+self.H2O+2*self.PROTON)/2
-                as2_mz=(np.array(bs_mass)+2*self.PROTON-self.CO)/2
-
-                ions_b_y.append([bs,bs1_mz,[_name+'+' for _name in b_name]])
-                ions_b_y.append([bs,bs2_mz,[_name+'++' for _name in b_name]])
-                ions_b_y.append([ys,ys1_mz,[_name+'+' for _name in y_name]])
-                ions_b_y.append([ys,ys2_mz,[_name+'++' for _name in y_name]])
-
-                ions_a.append([bs,as1_mz,[_name.replace('b','a')+'+' for _name in b_name]])
-                ions_a.append([bs,as2_mz,[_name.replace('b','a')+'++' for _name in b_name]])
-
-                ions_ay_by=[]
-                bys,bys_mass,bys_name=get_all_by(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
-                #by+/ay+
-                bys_mz=np.array(bys_mass)+self.PROTON
-                ays_mz=bys_mz-self.CO
-                ions_ay_by.append([bys,bys_mz,[_name+'+' for _name in bys_name]])
-                ions_ay_by.append([bys,ays_mz,[_name.replace('b','a')+'+' for _name in bys_name]])
-               
-
+                ions_b_y,ions_a,ions_ay_by=self.data_tools.get_ions_list(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
                 #ions match
-                
-                #b+,b++,y+,y++
+
+                 #b+,b++,y+,y++
                 _str=''
                 match_pep_result=[];b_y_result=[]
                 for i in range(len(peptide)-1):
@@ -497,89 +454,205 @@ class data_preprocessing(object):
                     for j in range(4):
                         if j%2==0:
                             temp_ion+=ions_b_y[j][0][i]+','
-                        index,_mz,_val=closest_mz(_spectrum[:,0],ions_b_y[j][1][i])
+                        index,_ppm=self.data_tools.closest_mz(_spectrum[:,:2],ions_b_y[j][1][i])
                         if index!=-1:
                           
-                            temp_mz+=str(_spectrum[index][0])+','
-                            _str+= str(_spectrum[index][0])+','+str(_mz-_val)+','+str(_spectrum[index][2])+'\n'
+                            #_str+= str(_spectrum[index][0])+','+str(_ppm)+','+str(_spectrum[index][2])+'\n'
+                            annotated_str=peptide+'\t'+ions_b_y[j][0][i]+'\t'+ions_b_y[j][2][i]+'\t'+str(_spectrum[index][0])+'\t'+str(_spectrum[index][1])+'\t'+str(_spectrum[index][2])+'\t'+str(_spectrum[index][3])+'\t0\n'
+                            self.annotated_peaks_count+=1
+                            annotated_peaks.write(annotated_str)
                             temp_inten_r+=str(_spectrum[index][2])+','
-                            temp_inten+=str(_spectrum[index][1])+','
                             _spectrum = np.delete(_spectrum, index, 0)
                         else:
-                            temp_mz+='0.0,'
                             temp_inten_r+='0.0,'
-                            temp_inten+='0.0,'
                         temp_ion_name+=ions_b_y[j][2][i]+','
-                    b_y_result.append([peptide,charge,temp_ion[:-1],psm[3],temp_mz[:-1],temp_ion_name[:-1],temp_inten_r[:-1],temp_inten[:-1]])
+                    b_y_result.append([peptide,charge,temp_ion[:-1],psm[3],temp_ion_name[:-1],temp_inten_r[:-1]])
                 match_b_y_result.append(b_y_result)
-                #with open('data/pre_data/MMdata/regular_ions_error_distribution_0.05_Da.txt','a') as f:
+                #with open('data/pre_data/ProteomeToolsData/proteo_regular_ions_error_distribution_20_ppm.txt','a') as f:
                 #    f.write(_str)
 
                  #a+,a++
+             
                 for i in range(len(peptide)-1):
                     for j in range(2):
-                        index=closest_mz(_spectrum[:,0],ions_a[j][1][i])
+                        index,_=self.data_tools.closest_mz(_spectrum[:,:2],ions_a[j][1][i])
                         if index!=-1:
                             _spectrum = np.delete(_spectrum, index, 0)
 
                 #ay+ by+
                 _str=''
-                match_pep_result=[]
-                ay_by_result=[]
-                for i in range(len(bys_mz)):
+                match_pep_result=[];ay_by_result=[]
+               
+                for i in range(len(ions_ay_by[0][1])):
                     match_pep_result.append(peptide)
                     temp_mz='';temp_ion_name='';temp_inten_r='';temp_inten=''
                     for j in range(2):
                         temp_ion=ions_ay_by[j][0][i]
-                        index,_mz,_val=closest_mz(_spectrum[:,0],ions_ay_by[j][1][i])
+                        index,_ppm_i=self.data_tools.closest_mz(_spectrum[:,:2],ions_ay_by[j][1][i])
                         if index!=-1:
-                            
-                            temp_mz+=str(_spectrum[index][0])+','
-                            _str+= str(_spectrum[index][0])+','+str(_mz-_val)+','+str(_spectrum[index][2])+'\n'
+                            #_str+= str(_spectrum[index][0])+','+str(_ppm_i)+','+str(_spectrum[index][2])+'\n'
+                            annotated_str=peptide+'\t'+ions_ay_by[j][0][i]+'\t'+ions_ay_by[j][2][i]+'\t'+str(_spectrum[index][0])+'\t'+str(_spectrum[index][1])+'\t'+str(_spectrum[index][2])+'\t'+str(_spectrum[index][3])+'\t0\n'
+                            self.annotated_peaks_count+=1
+                            annotated_peaks.write(annotated_str)
                             temp_inten_r+=str(_spectrum[index][2])+','
-                            temp_inten+=str(_spectrum[index][1])+','
                             _spectrum = np.delete(_spectrum, index, 0)
                         else:
-                            temp_mz+='0.0,'
                             temp_inten_r+='0.0,'
-                            temp_inten+='0.0,'
                         temp_ion_name+=ions_ay_by[j][2][i]+','
-                    ay_by_result.append([peptide,charge,temp_ion,psm[3],temp_mz[:-1],temp_ion_name[:-1],temp_inten_r[:-1],temp_inten[:-1]])
-                    
-                match_ay_by_result.append(ay_by_result)
-             
-                #with open('data/pre_data/MMdata/internal_ions_error_distribution_0.05_Da.txt','a') as f:
+                    ay_by_result.append([peptide,charge,temp_ion,psm[3],temp_ion_name[:-1],temp_inten_r[:-1]])
+               
+                match_ay_by_result.append(self.data_tools.avg_same_ion_inten(ions_ay_by[0][0],ay_by_result))
+                #with open('data/pre_data/ProteomeToolsData/proteo_internal_ions_error_distribution_20_ppm.txt','a') as f:
                 #    f.write(_str) 
+        
 
         b_y_train_wf=open(ion_folder+'/b_y_train.txt','w')      
         b_y_test_wf=open(ion_folder+'/b_y_test.txt','w')
-        pep_temp=''
+
+        ay_by_train_wf=open(ion_folder+'/ay_by_train.txt','w')      
+        ay_by_test_wf=open(ion_folder+'/ay_by_test.txt','w')
+        print(len(match_b_y_result))
+        print(len(match_ay_by_result))
+
         for k in range(len(match_b_y_result)):
             a= random.random()
             if a<0.9:
                 for _list in match_b_y_result[k]:
-                    b_y_train_wf.write('\t'.join(_list)+'\t'+spectrums[k]+'\n')
+                    b_y_train_wf.write('\t'.join(_list)+'\t'+spectrums_name[k]+'\n')
+                for _list in match_ay_by_result[k]:
+                    ay_by_train_wf.write('\t'.join(_list)+'\t'+spectrums_name[k]+'\n')
             else:
                 for _list in match_b_y_result[k]:
-                    b_y_test_wf.write('\t'.join(_list)+'\t'+spectrums[k]+'\n') 
+                    b_y_test_wf.write('\t'.join(_list)+'\t'+spectrums_name[k]+'\n') 
+                for _list in match_ay_by_result[k]:
+                    ay_by_test_wf.write('\t'.join(_list)+'\t'+spectrums_name[k]+'\n') 
+
         b_y_train_wf.close()
         b_y_test_wf.close()
-
-       
-        ay_by_train_wf=open(ion_folder+'/ay_by_train.txt','w')      
-        ay_by_test_wf=open(ion_folder+'/ay_by_test.txt','w')
-        pep_temp=''
-        for k in range(len(match_ay_by_result)):
-            a= random.random()
-            if a<0.9:
-                for _list in match_ay_by_result[k]:
-                    ay_by_train_wf.write('\t'.join(_list)+'\t'+spectrums[k]+'\n')
-            else:
-                for _list in match_ay_by_result[k]:
-                    ay_by_test_wf.write('\t'.join(_list)+'\t'+spectrums[k]+'\n') 
         ay_by_train_wf.close()
         ay_by_test_wf.close()
+    
+    def spectrum_fdr(self):
+        spectrum_files,spectrum_names=self.data_tools.self.data_tools.get_files(self.spectrum_folder)
+        
+        f_=open('data/pre_data/MMdata/annotated_peaks.txt','r') 
+        annotated_peaks=f_.readlines()
+        self.spectrums=defaultdict(list)
+        pbar = ProgressBar(widgets=['Read Spectrum files',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
+        for spectrum_file_index in range(len(spectrum_files)):
+            pbar.update(int((spectrum_file_index / (len(spectrum_files) - 1)) * 100))
+            spectrum=self.data_tools.self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'mm',True)
+            self.data_tools.self.data_tools.makedir('data\pre_data\MMdata/spectrum_fdr')
+            if len(spectrum)>0:
+                self.spectrums.update(spectrum)
+        pbar.finish()
+        f=open('data\pre_data\MMdata/spectrum_fdr/fdrs.txt','a')
+        random_keys=random.sample(self.spectrums.keys(), 1000)
 
+
+        #num_of_spectrum=len(self.spectrums)
+        #print(num_of_spectrum)
+        cunt=1;random_key_index_set=[]
+        #while cunt<1000:
+        #    random_key_index=random.randint(0,num_of_spectrum-1)
+        #    if random_key_index not in random_key_index_set:
+         #       random_key_index_set.append(random_key_index) 
+        #        random_key=list(self.spectrums.keys())[random_key_index]
+        pbar = ProgressBar(widgets = ['Processed Spectrum:',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
+        for i in range(len(random_keys)):       
+            pbar.update(int((i / (len(random_keys) - 1)) * 100))
+            self.calc_fdr(f,annotated_peaks,random_keys[i])
+            cunt+=1
+        #    else:
+        #        continue
+        pbar.finish() 
+        f.close()
+        print('   ######################################')
+  
+    def calc_fdr(self,file,annotated_peaks,random_key):
+       
+        _spectrum=np.array(self.spectrums[random_key])
+        peptide=random_key.split('#')[2]
+        regular_matched_inten=[];regular_matched_flag=[];internal_matched_inten=[];internal_matched_flag=[]
+        
+        for times in range(2000):
+            
+            noised_spectrum=self.data_tools.noise_spectrum(annotated_peaks,_spectrum)
+           
+            ions_b_y,ions_a,ions_ay_by=self.data_tools.get_ions_list(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
+
+            #ions match
+
+             #b+,b++,y+,y++
+            for i in range(len(peptide)-1):
+                for j in range(4):
+                    
+                    index,_ppm=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_b_y[j][1][i])
+                    if index!=-1:
+                       
+                        regular_matched_inten.append(noised_spectrum[index][2])
+                        regular_matched_flag.append(noised_spectrum[index][4])
+                        #if noised_spectrum[index][4]==1.0:
+                        #    regular_true_annotated += 1
+                        #elif  noised_spectrum[index][4]==0.0:
+                        #     regular_false_annotated += 1
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
+                       
+
+           #a+,a++
+         
+            for i in range(len(peptide)-1):
+                for j in range(2):
+                    index,_=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_a[j][1][i])
+                    if index!=-1:
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
+
+            #ay+ by+
+            for i in range(len(ions_ay_by[0][1])):
+                for j in range(2):
+                    index,_ppm_i=self.data_tools.closest_mz(noised_spectrum[:,:2],ions_ay_by[j][1][i])
+                    if index!=-1:
+                        internal_matched_inten.append(noised_spectrum[index][2])
+                        internal_matched_flag.append(noised_spectrum[index][4])
+                        #if noised_spectrum[index][4]==1.0:
+                        #    internal_true_annotated += 1
+                        #elif  noised_spectrum[index][4]==0.0:
+                        #    internal_false_annotated += 1
+                        noised_spectrum = np.delete(noised_spectrum, index, 0)
+        
+        for inten_threshold in self.inten_thresholds:
+            
+            internal_index=np.where(np.array(internal_matched_inten)>=inten_threshold)[0]
+            #print(len(internal_index))
+            internal_true_annotated=len(np.where(np.array(internal_matched_flag)[internal_index]==1.0)[0])
+            internal_false_annotated=len(internal_index)-internal_true_annotated
+
+           
+          
+            regular_index=np.where(np.array(regular_matched_inten)>=inten_threshold)[0]
+            #print(len(regular_index))
+            regular_true_annotated=len(np.where(np.array(regular_matched_flag)[regular_index]==1.0)[0])
+            regular_false_annotated=len(regular_index)-regular_true_annotated
+
+            
+            #print(random_key+'\t'+str(inten_threshold)+'\t'+str(regular_true_annotated)+'\t'+str(regular_false_annotated)+'\t'+str(internal_true_annotated)+'\t'+str(internal_false_annotated))
+            if regular_true_annotated==0:
+                regular_fdr=0.0
+            else:
+                regular_fdr=regular_false_annotated/regular_true_annotated
+            if internal_true_annotated==0:
+                internal_fdr=0.0
+            else:
+                internal_fdr=internal_false_annotated/internal_true_annotated
+            if regular_true_annotated+internal_true_annotated==0:
+                both_fdr=0.0
+            else:
+                both_fdr=(regular_false_annotated+internal_false_annotated)/(regular_true_annotated+internal_true_annotated)
+            write_str=random_key+'\t'+str(inten_threshold)+'\t'+str(regular_true_annotated)+'\t'+str(regular_false_annotated)+'\t'+str(regular_fdr)+'\t'+str(internal_true_annotated)+'\t'+str(internal_false_annotated)+'\t'+str(internal_fdr)+'\t'+str(both_fdr)+'\n'
+            file.write(write_str)
+       # except:
+          #  continue
+               
 
 
 class _comet():
