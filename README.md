@@ -56,16 +56,16 @@ In addition, whether it is training or prediction, different parameters need to 
 For regular ions, you need to set:<br/>
 
 	ion_type=regular
-	input_dim=188
+	input_dim=173
 	output_dim=4
 For internal ions, you need to set:<br/>	
 
 	ion_type=internal
-	input_dim=217
+	input_dim=198
 	output_dim=2
 	min_internal_ion_len=？
 	max_internal_ion_len=？
-Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 188, and the input dimension of the internal ion is 217. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
+Where ion_type represents the ion type, input_dim and output_dim represent the input dimension and output dimension of the data respectively. In this project, the input dimension of the regular ion is 173, and the input dimension of the internal ion is 198. For details, please refer to the file tools/get_data.py. The output dimension of a regular ion is 4, which stands for b+/b++/y+/y++, and the output dimension of the internal ion is 2, which stands for by+/ay+. Parameter min_internal_ion_len and max_internal_ion_len represent the minimum fragment length and the maximum fragment length of the internal ions that need to be trained or predicted in the experiments of internal ions (both sides of the threshold are closed intervals).<br/>
 	
 #### contact:<br/>
 		hpwang@sdut.edu.cn

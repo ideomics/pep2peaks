@@ -10,8 +10,8 @@ from data_preprocessing.tools import *
 from model.model import *
 class example(object):
     def __init__(self):
-        self.regular_model='models/regular_mm_all/'
-        self.internal_model='models/internal_mm_all/'
+        self.regular_model='models/regular_proteometools_NCE25_no_inten_threshold/'
+        self.internal_model='models/internal_proteometools_NCE25_no_inten_threshold/'
         self.modi='6,Oxidation[M],15,Oxidation[M]'
         self.charge=2
         self.internal_ion_min_length=1
@@ -29,14 +29,15 @@ class example(object):
 
         self.CO = self.C + self.O
         self.H2O= self.H * 2 + self.O
-
+        self.data_tools=data_tools()
         self.predict()
-    def parse_args(self,input_dim,output_dim):
+    def parse_args(self,input_dim,output_dim,ion_type):
         parser = argparse.ArgumentParser()
         parser.add_argument('--input_dim', type=int, default=input_dim,help='')
         parser.add_argument('--hidden_size', type=int, default=256,help='')
         parser.add_argument('--num_layers', type=int, default=2,help='')
         parser.add_argument('--l1_lamda', type=float, default=0.1,help='')
+        parser.add_argument('--ion_type', type=str, default=ion_type, help="regular or internal") 
         parser.add_argument('--output_keep_prob', type=float, default=0.5,help='')
         parser.add_argument('--output_dim', type=int, default=output_dim,help='')
         parser.add_argument('--learning-rate', type=float, default=5e-4,help='')
@@ -77,75 +78,76 @@ class example(object):
         #plt.gca().spines['top'].set_visible(False)
         #plt.gca().spines['right'].set_visible(False)
         plt.show()     
+    def merge_same_ions(self,_ions,pred):
+        pred_by=[];pred_ay=[];ions=[]
+        _pred_by=pred[:,0]
+        _pred_ay=pred[:,1]
+        d = defaultdict(list)
+        for k,va in [(v,i) for i,v in enumerate(_ions)]:
+            d[k].append(va) 
+        for ion,indexs in d.items():
+            pred_by.append(np.sum(np.array(_pred_by)[indexs]))
+            pred_ay.append(np.sum(np.array(_pred_ay)[indexs]))
+            ions.append(ion) 
+        return ions,pred_by,pred_ay
     def predict(self):
         
         print('predicting..')
-        ions_number=len(self.peptide)-1 
+        ions_b_y,_,ions_ay_by=self.data_tools.get_ions_list(self.peptide,self.internal_ion_min_length,self.internal_ion_max_length)
         #regular
-        model=pep2peaks(self.parse_args(188,4))
-        regular_mzs=[];regular_ion_type=[]
-        bs,bs_mass,b_name,ys,ys_mass,y_name=get_y_and_b(self.peptide)
-        bs1_mz=np.array(bs_mass)+self.PROTON
-        ys1_mz=np.array(ys_mass)+self.H2O+self.PROTON
+        model=pep2peaks(self.parse_args(173,4,'regular'))
 
-        bs2_mz=(np.array(bs_mass)+2*self.PROTON)/2
-        ys2_mz=(np.array(ys_mass)+self.H2O+2*self.PROTON)/2
         
-        regular_mzs.extend(bs1_mz)
-        regular_mzs.extend(bs2_mz)
-        regular_mzs.extend(ys1_mz)
-        regular_mzs.extend(ys2_mz)
-        regular_ion_type=[x+'+' for x in b_name]
-        regular_ion_type.extend([x+'++' for x in b_name])
-        regular_ion_type.extend([x+'+' for x in y_name])
-        regular_ion_type.extend([x+'++' for x in y_name])
+
+       
         encoder_inputs=[]
-        for i in range(ions_number):
-            line=self.peptide+'\t'+str(self.charge)+'\t'+bs[i]+','+ys[i]+'\t'+self.modi+'\t\t'+b_name[i]+'+,'+b_name[i]+'++,'+y_name[i]+'+,'+y_name[i]+'++'+'\t0,0,0,0'
-            _,vector,_,_=self.datam.ion_b_y_featurize_4label(line)
-            print(vector)
+        max_time=len(self.peptide)-1
+        for i in range(max_time):
+            line=self.peptide+'\t'+str(self.charge)+'\t'+ions_b_y[0][0][i]+','+ions_b_y[2][0][i]+'\t'+self.modi+'\t'+ions_b_y[0][2][i]+','+ions_b_y[1][2][i]+','+ions_b_y[2][2][i]+','+ions_b_y[3][2][i]+'\t0,0,0,0'
+            
+            _,vector,_,_=self.datam.ion2vec_4label(line)
+          
             encoder_inputs.append(vector)
-        regular_pred=[]
         with tf.Session() as session:
             model.saver.restore(session, tf.train.get_checkpoint_state(self.regular_model).model_checkpoint_path)
-            pred=model.predict(session,ions_number,np.array(encoder_inputs)[np.newaxis,:,:],[ions_number])
-            pred[pred<0]=0
-            pred[pred>1]=1
-            for k in range(4):
-                regular_pred.extend(np.array(pred)[:,k].tolist())
+            regular_pred=model.predict(session,max_time,np.array(encoder_inputs)[np.newaxis,:,:],[max_time])
+            regular_pred[regular_pred<0]=0
+            regular_pred[regular_pred>1]=1
+            #for k in range(4):
+            #    regular_pred.extend(np.array(pred)[:,k].tolist())
         tf.reset_default_graph()        
         #internal
-        model=pep2peaks(self.parse_args(217,2))
-        internal_mzs=[];internal_ion_type=[]
-        bys,bys_mass,bys_name=get_all_by(self.peptide,self.internal_ion_min_length,self.internal_ion_max_length)
-        bys_mz=np.array(bys_mass)+self.PROTON
-        ays_mz=bys_mz-self.CO
-        internal_mzs.extend(bys_mz)
-        internal_mzs.extend(ays_mz)
-        internal_ion_type=[x+'+' for x in bys_name]
-        internal_ion_type.extend([x.replace('b','a')+'+' for x in bys_name])
+        model=pep2peaks(self.parse_args(198,2,'internal'))
+        
         encoder_inputs=[]
-        for i in range(len(internal_ion_type)//2):
-            line=self.peptide+'\t'+str(self.charge)+'\t'+bys[i]+'\t'+self.modi+'\t\t'+bys_name[i]+'+,'+bys_name[i].replace('b','a')+'\t0,0'
-            _,vector,_,_,_=self.datam.ion_ay_by_featurize_2label(line)
+        max_time=0
+        for i in range(self.internal_ion_max_length):
+            max_time+=(len(self.peptide)-(i+2))
+        internal_ions=[]
+        for i in range(max_time):
+            internal_ions.append((self.peptide+'\t'+str(self.charge)+'\t'+ions_ay_by[0][0][i]+'\t'+self.modi+'\t'+ions_ay_by[0][2][i]+','+ions_ay_by[1][2][i]+'\t0,0').split('\t'))
+        self.data_tools.avg_same_ion_inten(ions_ay_by[0][0],internal_ions)
+        for internal_ion in internal_ions:
+            _,vector,_,_,_=self.datam.ion2vec_2label('\t'.join(internal_ion))
             encoder_inputs.append(vector)
-        internal_pred=[]
         with tf.Session() as session:
             model.saver.restore(session, tf.train.get_checkpoint_state(self.internal_model).model_checkpoint_path)
-            pred=model.predict(session,len(internal_ion_type)//2,self.datam.vertor_normalize(np.array(encoder_inputs))[np.newaxis,:,:],[len(internal_ion_type)//2])
-            pred[pred<0]=0
-            pred[pred>1]=1
-            for k in range(2):
-                internal_pred.extend(np.array(pred)[:,k].tolist())
+            internal_pred=model.predict(session,max_time,np.array(encoder_inputs)[np.newaxis,:,:],[max_time])
+            internal_pred[internal_pred<0]=0
+            internal_pred[internal_pred>1]=1
+
+        ions,pred_by,pred_ay=self.merge_same_ions(ions_ay_by[0][0],internal_pred) 
 
         ##################
         print('regular ions:')
-        for i in range(len(regular_ion_type)):
-            print(regular_ion_type[i]+":"+str(regular_pred[i]))
+        for i in range(len(ions_b_y[0][0])):
+            print(ions_b_y[0][0][i]+": "+ions_b_y[0][2][i]+":"+str(round(regular_pred[i][0],4))+","+ions_b_y[1][2][i]+":"+str(round(regular_pred[i][1],4)))
+        for i in range(len(ions_b_y[0][0])):
+            print(ions_b_y[2][0][i]+": "+ions_b_y[2][2][i]+":"+str(round(regular_pred[i][2],4))+", "+ions_b_y[3][2][i]+":"+str(round(regular_pred[i][3],4)))
         print('\ninternal ions:')
-        for i in range(len(internal_ion_type)):
-            print(internal_ion_type[i]+":"+str(internal_pred[i])) 
+        for i in range(len(ions)):
+            print(ions[i]+": by:"+str(round(pred_by[i],4))+", ay:"+str(round(pred_ay[i],4))) 
         
-        self.plot(regular_ion_type,regular_mzs,regular_pred,internal_ion_type,internal_mzs,internal_pred)
+        #self.plot(regular_ion_type,regular_mzs,regular_pred,internal_ion_type,internal_mzs,internal_pred)
 if __name__=='__main__':
     example()

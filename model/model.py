@@ -107,11 +107,11 @@ class pep2peaks(object):
             mask=tf.to_float(tf.reshape(tf.sequence_mask(self.sequence_length,self.max_time),[self.batch_size*self.max_time,1]))
             labels=tf.reshape(self.decoder_targets,[self.batch_size*self.max_time,self.output_dim])
             
-            self.loss=tf.cond(tf.cast(self.regular,tf.bool),
-                              lambda:tf.losses.absolute_difference(labels,self.decoder_prediction,weights=mask),
-                              lambda:tf.losses.mean_squared_error(labels,self.decoder_prediction,weights=mask)
-                                                )
-            
+            #self.loss=tf.cond(tf.cast(self.regular,tf.bool),
+             #                 lambda:tf.losses.absolute_difference(labels,self.decoder_prediction,weights=mask),
+              #                lambda:tf.losses.mean_squared_error(labels,self.decoder_prediction,weights=mask)
+            #                                    )
+            self.loss=tf.losses.absolute_difference(labels,self.decoder_prediction,weights=mask)
            
             tf.summary.scalar('loss', self.loss)
             tf.add_to_collection('loss', self.loss)

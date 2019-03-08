@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{c628413d-217f-4a03-934b-9ecee4d12268}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>model\pep2peaks.py</StartupFile>
+    <StartupFile>example.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -28,9 +28,6 @@
     <Compile Include="example.py" />
     <Compile Include="model\model.py" />
     <Compile Include="model\pep2peaks.py" />
-    <Compile Include="model\temp.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="tools\get_data.py" />
     <Compile Include="tools\pearson.py" />
   </ItemGroup>

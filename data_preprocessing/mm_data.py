@@ -1,6 +1,7 @@
 from numpy import *
 import os
 from tools import *
+from progressbar import *
 class data_preprocessing(object):
     def __init__(self,mgf_name):
         self.data_tools=data_tools()
@@ -22,6 +23,7 @@ class data_preprocessing(object):
         self.fdr_folder='FDR0_01'
         self.spectrum_sequence_folder='spectrum_sequence'
         self.spectrum_sequence_file_folder_list=[]
+        self.inten_thresholds=np.linspace(0.0,0.02,40).tolist()
         #####################
         #self.data_run()
         #self.merge_3_result()
@@ -30,9 +32,9 @@ class data_preprocessing(object):
         #self.remove_decoy_redundant()
         #self.psms_mpc_classify()
         ###########################
-		self.annotated_peaks_count=0
-        self.ion_run()
-
+        
+        #self.ion_run()
+        
     def pep2_proteins_to_psms(self,_proteins_files,_psms_files,write_files,charge):
         proteins_files,proteins_names=self.data_tools.get_files(_proteins_files)
         psms_files,psms_names=self.data_tools.get_files(_psms_files)
@@ -431,6 +433,15 @@ class data_preprocessing(object):
                 sum_of_intensity+=np.sum(_spectrum[:,1])
         with open(ion_folder+'/sum_of_intensity.txt','w') as wf:
             wf.write(str(sum_of_intensity)+'\n')
+    
+    def write_spectrum(self,spec_name,peptide,charge,spectrum):
+        file_name=spec_name.split('.')[0].split('_')[-1]
+        with open('data/pre_data/MMdata/spectrums/'+file_name+'.mgf','a') as f:
+            f.write('BEGIN IONS\nTITLE='+spec_name+'\nSEQ='+peptide+'\nCHARGE='+charge+'+\nRTINSECONDS=\nPEPMASS=\n')
+            for i in range(len(spectrum)):
+                f.write(str(spectrum[i][0])+' '+str(spectrum[i][1])+'\n')
+            f.write('END IONS\n')
+
     def match_psms_with_spectra(self,ion_folder):
        
         annotated_peaks=open('data/pre_data/MMdata/annotated_peaks.txt','a') 
@@ -442,6 +453,7 @@ class data_preprocessing(object):
                 peptide=psm[2]
                 _spectrum=np.array(self.spectrums[spec_name])
                 charge=psm[1]
+                self.write_spectrum(psm[0],peptide,charge,_spectrum)
                 ions_b_y,ions_a,ions_ay_by=self.data_tools.get_ions_list(peptide,self.internal_ion_min_length,self.internal_ion_max_length)
                 #ions match
 
@@ -459,7 +471,6 @@ class data_preprocessing(object):
                           
                             #_str+= str(_spectrum[index][0])+','+str(_ppm)+','+str(_spectrum[index][2])+'\n'
                             annotated_str=peptide+'\t'+ions_b_y[j][0][i]+'\t'+ions_b_y[j][2][i]+'\t'+str(_spectrum[index][0])+'\t'+str(_spectrum[index][1])+'\t'+str(_spectrum[index][2])+'\t'+str(_spectrum[index][3])+'\t0\n'
-                            self.annotated_peaks_count+=1
                             annotated_peaks.write(annotated_str)
                             temp_inten_r+=str(_spectrum[index][2])+','
                             _spectrum = np.delete(_spectrum, index, 0)
@@ -492,7 +503,6 @@ class data_preprocessing(object):
                         if index!=-1:
                             #_str+= str(_spectrum[index][0])+','+str(_ppm_i)+','+str(_spectrum[index][2])+'\n'
                             annotated_str=peptide+'\t'+ions_ay_by[j][0][i]+'\t'+ions_ay_by[j][2][i]+'\t'+str(_spectrum[index][0])+'\t'+str(_spectrum[index][1])+'\t'+str(_spectrum[index][2])+'\t'+str(_spectrum[index][3])+'\t0\n'
-                            self.annotated_peaks_count+=1
                             annotated_peaks.write(annotated_str)
                             temp_inten_r+=str(_spectrum[index][2])+','
                             _spectrum = np.delete(_spectrum, index, 0)
@@ -533,7 +543,7 @@ class data_preprocessing(object):
         ay_by_test_wf.close()
     
     def spectrum_fdr(self):
-        spectrum_files,spectrum_names=self.data_tools.self.data_tools.get_files(self.spectrum_folder)
+        spectrum_files,spectrum_names=self.data_tools.get_files('data/pre_data/MMdata/spectrums')
         
         f_=open('data/pre_data/MMdata/annotated_peaks.txt','r') 
         annotated_peaks=f_.readlines()
@@ -541,8 +551,8 @@ class data_preprocessing(object):
         pbar = ProgressBar(widgets=['Read Spectrum files',Percentage(), ' ', Bar('#'),' ',' ', ETA(), ' ']).start()
         for spectrum_file_index in range(len(spectrum_files)):
             pbar.update(int((spectrum_file_index / (len(spectrum_files) - 1)) * 100))
-            spectrum=self.data_tools.self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'mm',True)
-            self.data_tools.self.data_tools.makedir('data\pre_data\MMdata/spectrum_fdr')
+            spectrum=self.data_tools.get_spectrums(spectrum_files[spectrum_file_index],'mm2',True)
+            self.data_tools.makedir('data\pre_data\MMdata/spectrum_fdr')
             if len(spectrum)>0:
                 self.spectrums.update(spectrum)
         pbar.finish()
@@ -1335,6 +1345,7 @@ class _pFind():
             print('mod complete')
 
 if __name__=='__main__':
-    for mgf_name in ['Ecoli','Hela','Yeast']:
-        data_preprocessing(mgf_name)
+    #for mgf_name in ['Ecoli','Hela','Yeast']:
+    #    
+    data_preprocessing('spectrum').spectrum_fdr()
     

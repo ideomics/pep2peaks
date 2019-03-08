@@ -56,7 +56,7 @@ class GetData(object):
 
   
 
-    def ion2vec_2lable(self,line,fragmentation_window_size=1):
+    def ion2vec_2label(self,line,fragmentation_window_size=1):
         vector=[]
         f_line = line.split('\t')
         peptide_for_fragment=[]
@@ -69,8 +69,8 @@ class GetData(object):
         charge=int(f_line[1])
 
         ion = list(f_line[2])
-        fragment_pos1=len(peptide)-int(f_line[5].split(',')[0][1:-1].split('b')[0])
-        fragment_pos2=int(f_line[5].split(',')[0][1:-1].split('b')[1])
+        fragment_pos1=len(peptide)-int(f_line[4].split(',')[0][1:-1].split('b')[0])
+        fragment_pos2=int(f_line[4].split(',')[0][1:-1].split('b')[1])
 
         window_aa_list1=peptide_for_fragment[fragment_pos1-1:fragment_pos1+2*fragmentation_window_size-1]  
         window_aa_list2=peptide_for_fragment[fragment_pos2-1:fragment_pos2+2*fragmentation_window_size-1]  
@@ -145,11 +145,11 @@ class GetData(object):
 
         labels=list(map(eval,f_line[5].split(',')))
 
-        return f_line[0],vector,labels,charge,len(ion)
+        return f_line[0],vector,labels,charge,f_line[2]
 
   
 
-    def ion2vec_4lable(self,line,fragmentation_window_size=1):
+    def ion2vec_4label(self,line,fragmentation_window_size=1):
         vector=[]
         f_line = line.split('\t')
         peptide_for_fragment=[]
@@ -307,14 +307,14 @@ class GetData(object):
             peptide = row.Peptide
             if peptide != temp_peptide:
                 if temp_peptide == '':
-                    temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.IonLen])
+                    temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.ion])
                 else:
                     intensity_list.append(temp_list)
                     temp_list = []
-                    temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.IonLen])
+                    temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.ion])
                 temp_peptide = peptide
             else:
-                temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.IonLen])
+                temp_list.append([row.Number,row.IntensityBy,row.IntensityAy,row.ion])
         intensity_list.append(temp_list)
         return intensity_list
     def merge_list_4label(self,data):
@@ -380,7 +380,7 @@ class GetData(object):
     
     def get_data(self,path,min_internal_len,max_internal_len,is_mobile):
         print('loading data...')
-        X=[];y=[];idx=[];cunt=0;peptides=[];ions_len=[]
+        X=[];y=[];idx=[];cunt=0;peptides=[];ions=[]
        
         all_lines=[];mobile_lines=[];non_mobile_lines=[];partial_mobiles_lines=[]
         with open(path,'r') as rf:
@@ -411,18 +411,18 @@ class GetData(object):
             for line in lines:
                 if len(line.split('\t')[2])>=min_internal_len and len(line.split('\t')[2])<=max_internal_len:
 
-                    pep,vector,label,charge,ion_len=self.ion2vec_2lable(line)
-                    ions_len.append(ion_len)
+                    pep,vector,label,charge,ion=self.ion2vec_2label(line)
+                    ions.append(ion)
                     cunt+=1
                     X.append(vector)
                     y.append(label)
                     peptides.append(pep+'#'+str(charge))
                     idx.append(cunt)
                    
-            merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"IonLen":ions_len,"IntensityBy":np.array(y)[:,0].tolist(),"IntensityAy":np.array(y)[:,1].tolist()}) 
+            merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"ion":ions,"IntensityBy":np.array(y)[:,0].tolist(),"IntensityAy":np.array(y)[:,1].tolist()}) 
         elif self.ion_type == 'regular':
             for line in lines:
-                pep,vector,label,charge=self.ion2vec_4lable(line)
+                pep,vector,label,charge=self.ion2vec_4label(line)
                 cunt+=1
                 X.append(vector)
                 y.append(label)
@@ -431,6 +431,6 @@ class GetData(object):
             merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"IntensityB1":np.array(y)[:,0].tolist(),"IntensityB2":np.array(y)[:,1].tolist(),"IntensityY1":np.array(y)[:,2].tolist(),"IntensityY2":np.array(y)[:,3].tolist()})
        
         merge_list=self.merge_list_ap(merge_dataframe)
-        return np.array(idx),np.array(peptides), np.array(X,dtype=np.float32),np.array(y),merge_list,ions_len
+        return np.array(idx),np.array(peptides), np.array(X,dtype=np.float32),np.array(y),merge_list,ions
    
   
