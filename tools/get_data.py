@@ -42,9 +42,10 @@ class GetData(object):
        
         self.ion_type=ion_type
     def get_split_list(self,array_list):
+       
         list=[]
         for n in array_list:
-            list.append(int(n[0]-1))
+            list.append(int(int(n[0])-1))
         return list
    
     def get_split_list2(self,array_list):
@@ -391,6 +392,7 @@ class GetData(object):
                     all_lines.append(line)
                     peptide = line.split('\t')[0]
                     charge = int(line.split('\t')[1])
+
                     num = peptide.count('R')+peptide.count('K')+peptide.count('H')
                     if num < charge:
                         mobile_lines.append(line)
@@ -398,6 +400,7 @@ class GetData(object):
                         non_mobile_lines.append(line)
                     else:
                         partial_mobiles_lines.append(line)
+
         if is_mobile=='mobile':
             lines=mobile_lines
         elif is_mobile=='non_mobile':

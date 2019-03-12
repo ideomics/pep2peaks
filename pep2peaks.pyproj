@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{c628413d-217f-4a03-934b-9ecee4d12268}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>example.py</StartupFile>
+    <StartupFile>model\pep2peaks.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
