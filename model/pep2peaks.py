@@ -19,7 +19,8 @@ tf.set_random_seed(seed)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--is-train', type=int, default=0,help='1=train, 2=test, 0=train and test')
+    parser.add_argument('--is-train', type=int, default=2,help='1=train, 2=test, 0=train and test')
+    parser.add_argument('--is_transfer', type=bool, default=True,help='')
     parser.add_argument('--num-iter', type=int, default=200,help='')
     parser.add_argument('--batch_size', type=int, default=256,help='')
     parser.add_argument('--hidden_size', type=int, default=256,help='')
@@ -31,7 +32,7 @@ def parse_args():
     parser.add_argument('--is_mobile', type=str, default='all', help="mobile,non_mobile,partial_mobile,all,") 
 
     parser.add_argument('--ion_type', type=str, default='regular', help="regular or internal") 
-    parser.add_argument('--model', type=str, default='models/regular_mm/', help="") 
+    parser.add_argument('--model', type=str, default='models/regular_humanbody/', help="") 
     parser.add_argument('--input_dim', type=int, default=173,help='173 if regular else 198')
     parser.add_argument('--output_dim', type=int, default=4,help='4 if regular else 2')
     parser.add_argument('--min_internal_ion_len', type=int, default=1,help='')
@@ -81,18 +82,19 @@ def padding_data(data,max_ions_number,is_target):
 
 def train(args):
     model = pep2peaks(args)
-
+    
     with tf.Session() as sess:
-        
+        if args.is_transfer:
+            model.saver.restore(sess, tf.train.get_checkpoint_state('models/regular_proteometools_NCE35_mobile/').model_checkpoint_path)
         writer = tf.summary.FileWriter("model/logs", sess.graph)
         sess.run(tf.global_variables_initializer())
         #train data
-        _,_,train_X,train_y,merge_train_list,_=datam.get_data('data/data_mm/b_y_train.txt',args.min_internal_ion_len,args.max_internal_ion_len,'')
+        _,_,train_X,train_y,merge_train_list,_=datam.get_data('data/data_proteometools/NCE35_b_y_train.txt',args.min_internal_ion_len,args.max_internal_ion_len,args.is_mobile)
         print(str(len(merge_train_list[0]))+' train peptides ,DataShape:('+str(np.array(train_X).shape)+str(np.array(train_y).shape)+')')
         batch_peptide,_batch_number,seq_length=get_batch_peptide(merge_train_list,args.batch_size,True)
         
         #val data
-        _,_,val_X,val_y,merge_val_list,_=datam.get_data('data/data_mm/b_y_test.txt',args.min_internal_ion_len,args.max_internal_ion_len,'')
+        _,_,val_X,val_y,merge_val_list,_=datam.get_data('data/data_proteometools/NCE35_b_y_train.txt',args.min_internal_ion_len,args.max_internal_ion_len,args.is_mobile)
         print(str(len(merge_val_list[0]))+' val peptides ,DataShape:('+str(np.array(val_X).shape)+str(np.array(val_y).shape)+')')
         val_batch_peptide,val_batch_number,val_seq_length=get_batch_peptide(merge_val_list,args.batch_size,False)
         
@@ -136,7 +138,7 @@ def train(args):
             print('Iter:{0}/{1}  train loss:{2:.4} val loss:{3:.4}'.format(Iter+1,args.num_iter,(train_loss/_batch_number),(val_loss/val_batch_number)))
             if best_loss > val_loss/val_batch_number:
                 best_loss=val_loss/val_batch_number
-                print("Saved best Model:",model.saver.save(sess, 'models/regular_mm/model.ckpt'))
+                print("Saved best Model:",model.saver.save(sess, 'models/regular_proteometools_NCE35_mobile_transfer_non_mobile/model.ckpt'))
             writer.add_summary(train_summary, Iter)
     tf.reset_default_graph()
   
@@ -144,7 +146,7 @@ def model_predict(args):
     model=pep2peaks(args)
     print('predicting..')
     print('pep type:'+args.is_mobile)
-    idx,peptide,test_X,test_y,merge_test_list,ions=datam.get_data('data/data_mm/b_y_test.txt',args.min_internal_ion_len,args.max_internal_ion_len,args.is_mobile)
+    idx,peptide,test_X,test_y,merge_test_list,ions=datam.get_data('data/data_proteometools/NCE30_b_y_test.txt',args.min_internal_ion_len,args.max_internal_ion_len,args.is_mobile)
     
     print(str(len(merge_test_list[0]))+' test peptides ,DataShape:('+str(np.array(test_X).shape)+str(np.array(test_y).shape)+')')
     test_batch_peptide,_batch_number,seq_length=get_batch_peptide(merge_test_list,args.batch_size,False)
@@ -203,11 +205,12 @@ def main(args):
         train(args)
         test(args)
 if __name__ == '__main__':
-    args=parse_args()
-    
-    datam=GetData(args.ion_type)
-    pear=CalcPerson(args.ion_type)
-   
-    main(args)
+    #with tf.device('/cpu:0'):
+        args=parse_args()
+        
+        datam=GetData(args.ion_type)
+        pear=CalcPerson(args.ion_type)
+       
+        main(args)
 
 

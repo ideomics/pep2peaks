@@ -69,9 +69,11 @@ class CalcPerson(object):
             _real,_pred=self.get_pearson_x(merge_list,i)
             pccs.extend([pearsonr(_real,_pred)[0]]*len(merge_list[0][i]))
             if self.ion_type=='internal':
+               
                 pep_len=(len(merge_list[0][i])+5)/2
             else:
                 pep_len=len(merge_list[0][i])+1
+            
             peplens.extend([pep_len]*len(merge_list[0][i]))
             for j in range(len(pep_len_list)):
                 if pep_len>pep_len_list[j] and pep_len<=pep_len_list[j+1]:
@@ -100,7 +102,7 @@ class CalcPerson(object):
         for key,value in person_list_dic.items():
             _list.extend(value)
             print('pep len '+str(key)+': '+str(np.mean(value)))
-            with open('data/pred/proteo_'+self.ion_type+'_'+key+'.txt','w') as f:
+            with open('data/pred/'+self.ion_type+'_'+key+'.txt','w') as f:
                 _str=''
                 for pers_s  in value:
                     _str+=str(pers_s)+','

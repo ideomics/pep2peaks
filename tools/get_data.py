@@ -425,12 +425,14 @@ class GetData(object):
             merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"ion":ions,"IntensityBy":np.array(y)[:,0].tolist(),"IntensityAy":np.array(y)[:,1].tolist()}) 
         elif self.ion_type == 'regular':
             for line in lines:
-                pep,vector,label,charge=self.ion2vec_4label(line)
-                cunt+=1
-                X.append(vector)
-                y.append(label)
-                peptides.append(pep+'#'+str(charge))
-                idx.append(cunt) 
+                
+                if len(line.split('\t')[0])<=20:
+                    pep,vector,label,charge=self.ion2vec_4label(line)
+                    cunt+=1
+                    X.append(vector)
+                    y.append(label)
+                    peptides.append(pep+'#'+str(charge))
+                    idx.append(cunt) 
             merge_dataframe = pd.DataFrame({"Number":idx,"Peptide":peptides,"IntensityB1":np.array(y)[:,0].tolist(),"IntensityB2":np.array(y)[:,1].tolist(),"IntensityY1":np.array(y)[:,2].tolist(),"IntensityY2":np.array(y)[:,3].tolist()})
        
         merge_list=self.merge_list_ap(merge_dataframe)

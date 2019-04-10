@@ -21,6 +21,9 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="data\data_humanbodymap\merge.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="data_preprocessing\merge_ion.py" />
     <Compile Include="data_preprocessing\mm_data.py" />
     <Compile Include="data_preprocessing\proteometools_data.py" />
@@ -33,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="data\" />
+    <Folder Include="data\data_humanbodymap\" />
     <Folder Include="data\data_mm\" />
     <Folder Include="data\data_proteometools\" />
     <Folder Include="data_preprocessing" />
@@ -50,6 +54,18 @@
     <Folder Include="tools" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="data\data_humanbodymap\NCE30_ay_by_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE30_ay_by_train.txt" />
+    <Content Include="data\data_humanbodymap\NCE30_b_y_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE30_b_y_train.txt" />
+    <Content Include="data\data_humanbodymap\NCE35_ay_by_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE35_ay_by_train.txt" />
+    <Content Include="data\data_humanbodymap\NCE35_b_y_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE35_b_y_train.txt" />
+    <Content Include="data\data_humanbodymap\NCE40_ay_by_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE40_ay_by_train.txt" />
+    <Content Include="data\data_humanbodymap\NCE40_b_y_test.txt" />
+    <Content Include="data\data_humanbodymap\NCE40_b_y_train.txt" />
     <Content Include="data\data_mm\ay_by_test.txt" />
     <Content Include="data\data_mm\ay_by_train.txt" />
     <Content Include="data\data_mm\b_y_test.txt" />
@@ -66,8 +82,6 @@
     <Content Include="data\data_proteometools\NCE35_ay_by_train.txt" />
     <Content Include="data\data_proteometools\NCE35_b_y_test.txt" />
     <Content Include="data\data_proteometools\NCE35_b_y_train.txt" />
-    <Content Include="data\internal_pred.csv" />
-    <Content Include="data\regular_pred.csv" />
     <Content Include="models\checkpoint" />
     <Content Include="models\internal_mm_all\checkpoint" />
     <Content Include="models\internal_mm_all\seq2seq-model.ckpt.data-00000-of-00001" />

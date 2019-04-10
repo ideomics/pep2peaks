@@ -75,7 +75,7 @@ class pep2peaks(object):
             encoder_final_state_h = tf.concat((encoder_fw_final_state[self.num_layers-1].h, encoder_bw_final_state[self.num_layers-1].h), 1)
             encoder_final_state = LSTMStateTuple(c=encoder_final_state_c,h=encoder_final_state_h)
             hidden_state=tf.concat(encoder_final_state,axis=1)
-           
+            print(hidden_state.get_shape())
             return encoder_outputs,hidden_state
     def decoder(self,encoder_outputs,hidden_state):
         with tf.variable_scope("decoder"):
